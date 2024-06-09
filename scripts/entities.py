@@ -61,7 +61,6 @@ class Player(KinematicBody):
             self.moving = True
             self.facing = self.movement.copy() # self.facing will contain last direction we moved before stopping
         self.movement = self.going.copy() # copy our key inputs into our movement inputs
-        print(self.action)
         
         # For sprites, we need to set self.image and self.rect every frame.
         # self.render() sets the self.image
