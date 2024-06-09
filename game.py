@@ -1,5 +1,6 @@
 from scripts.imports import *
 
+from scripts.tilemap import Tilemap
 from scripts.utils import Animation, get_spritesheet_images, load_image
 from scripts.entities import Player
 from scripts.sprite_group import Collection
@@ -30,10 +31,16 @@ class Game:
         
         self.foreground = Collection()
         self.player = Player(Vector2(0, 0), [self.foreground], self)
+        
+        #------------ Levels
+        
+        self.level = Tilemap("rocky_plains")
 
     def run(self):
         while True:
             self.display.fill((150, 220, 255))
+            
+            self.level.draw(self.screen)
             
             # Update all in the foreground
             self.foreground.update()
