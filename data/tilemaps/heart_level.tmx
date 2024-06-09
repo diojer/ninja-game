@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="30" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="1">
  <tileset firstgid="1" source="../tilesets/TilesetFloor.tsx"/>
- <tileset firstgid="573" source="../../../test-game/data/tilesets/TilesetNature.tsx"/>
+ <tileset firstgid="573" source="../tilesets/TilesetNature.tsx"/>
  <layer id="2" name="Floor" width="30" height="30">
   <data encoding="csv">
 276,276,276,276,276,276,276,1610613039,2684354861,2684354862,265,265,265,265,265,3221225773,301,265,265,265,265,3221225773,2684354861,303,276,276,276,276,276,276,
