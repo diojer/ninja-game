@@ -34,7 +34,7 @@ class Player(KinematicBody):
         
         #----- Animation
         self.action: str = ""
-        
+        self.flip = False
         self.animation = False
 
     def set_action(self, action: str):
@@ -45,6 +45,7 @@ class Player(KinematicBody):
         """
         
         if action == "idle":
+            self.action = action
             self.animation = False
             # "idle" does not point to an animation object in our assets, it points to a list of images.
             # We do not want to be animated while we are idle.
@@ -60,11 +61,8 @@ class Player(KinematicBody):
             self.moving = True
             self.facing = self.movement.copy() # self.facing will contain last direction we moved before stopping
         self.movement = self.going.copy() # copy our key inputs into our movement inputs
+        print(self.action)
         
-        if self.animation: # if we are being animated
-            self.animation.update()
-            self.image = self.animation.img()
-            
         # For sprites, we need to set self.image and self.rect every frame.
         # self.render() sets the self.image
         self.render()
@@ -77,18 +75,34 @@ class Player(KinematicBody):
     
     def render(self):
         if not self.moving:
+            self.set_action("idle")
             
             # If we are idle:
             if self.facing["up"]:
                 self.image = self.assets["idle"][1]
             if self.facing["down"]:
                 self.image = self.assets["idle"][0]
-            if self.facing["left"]:
+            if self.facing["left"] or self.facing["right"]:
                 self.image = self.assets["idle"][2]
-            if self.facing["right"]:
-                self.image = self.assets["idle"][3]
             
             # down  = 0
             # up    = 1
             # left  = 2
             # right = 3
+        else:
+            if self.facing["up"]:
+                self.set_action("walk_u")
+            elif self.facing["down"]:
+                self.set_action("walk_d")
+            elif self.facing["left"] or self.facing["right"]:
+                self.set_action("walk_s")
+            
+        if self.animation: # if we are being animated
+            self.animation.update()
+            self.image = self.animation.img()
+        
+        if not (self.facing["up"] or self.facing["down"]):
+            if self.facing["right"]:
+                self.flip = True
+            elif self.facing["left"]:
+                self.flip = False

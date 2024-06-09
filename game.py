@@ -2,6 +2,7 @@ from scripts.imports import *
 
 from scripts.utils import Animation, get_spritesheet_images, load_image
 from scripts.entities import Player
+from scripts.sprite_group import Collection
 
 DISPLAY_SCALE = 6
 
@@ -27,7 +28,7 @@ class Game:
         
         #------------ Sprites
         
-        self.foreground = pygame.sprite.Group()
+        self.foreground = Collection()
         self.player = Player(Vector2(0, 0), [self.foreground], self)
 
     def run(self):
