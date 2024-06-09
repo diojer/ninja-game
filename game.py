@@ -17,11 +17,11 @@ class Game:
         #------------ Assets
         
         self.assets: dict[str, dict[str, Animation | list[pygame.Surface]]] = {
-            "cave_girl": {
-                "idle": get_spritesheet_images((16, 16), load_image("cave_girl/idle.png")),
-                "walk_d": Animation(get_spritesheet_images((16, 16), load_image("cave_girl/walk_d.png"), True), 5),
-                "walk_u": Animation(get_spritesheet_images((16, 16), load_image("cave_girl/walk_u.png"), True), 5),
-                "walk_s": Animation(get_spritesheet_images((16, 16), load_image("cave_girl/walk_s.png"), True), 5)
+            "Ginger": {
+                "idle": get_spritesheet_images((16, 16), load_image("Ginger/idle.png")),
+                "walk_d": Animation(get_spritesheet_images((16, 16), load_image("Ginger/walking_d.png")), 5),
+                "walk_u": Animation(get_spritesheet_images((16, 16), load_image("Ginger/walking_u.png")), 5),
+                "walk_s": Animation(get_spritesheet_images((16, 16), load_image("Ginger/walking_s.png")), 5)
             }
         }
         

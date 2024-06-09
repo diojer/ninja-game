@@ -23,7 +23,7 @@ class Player(KinematicBody):
         super().__init__(pos, groups, game)
         
         #----- Sprite set-up
-        self.assets = self.game.assets["cave_girl"]
+        self.assets = self.game.assets["Ginger"]
         self.image = self.assets["idle"][0]
         self.rect: Rect = Rect(self.pos, self.image.get_size())
         
