@@ -3,20 +3,20 @@ from scripts.imports import *
 from scripts.utils import Animation, get_spritesheet_images, load_image
 from scripts.entities import Player
 
-SCALE = 6
+DISPLAY_SCALE = 6
 
 class Game:
     def __init__(self) -> None:
         pygame.init()
         self.screen_size: tuple = (1280, 720)
         self.screen = pygame.display.set_mode((self.screen_size[0], self.screen_size[1]), pygame.RESIZABLE)
-        self.display = pygame.Surface((self.screen_size[0]//SCALE, self.screen_size[1]//SCALE))
+        self.display = pygame.Surface((self.screen_size[0]//DISPLAY_SCALE, self.screen_size[1]//DISPLAY_SCALE))
         self.clock = pygame.time.Clock()
         pygame.display.set_caption("Ninja Game")
         
         #------------ Assets
         
-        self.assets = {
+        self.assets: dict[str, dict[str, Animation | list[pygame.Surface]]] = {
             "cave_girl": {
                 "idle": get_spritesheet_images((16, 16), load_image("cave_girl/idle.png")),
                 "walk_d": Animation(get_spritesheet_images((16, 16), load_image("cave_girl/walk_d.png"), True), 5),
@@ -34,7 +34,8 @@ class Game:
         while True:
             self.display.fill((150, 220, 255))
             
-            self.player.update()
+            # Update all in the foreground
+            self.foreground.update()
             self.foreground.draw(self.display)
             
             for event in pygame.event.get():
