@@ -7,15 +7,39 @@ class KinematicBody(pygame.sprite.Sprite):
         self.game: "Game" = game
         self.movement = dict(left = False, right = False, up = False, down = False)
         self.vel: Vector2 = Vector2(1, 1)
+        self.rect: FRect
+        self.hitbox: FRect
 
     def update(self):
         
         # We increment x and y separately for collision detection reasons.
-        self.pos.x += (self.movement["right"] - self.movement["left"]) * self.vel.x
-        self.pos.y += (self.movement["down"] - self.movement["up"]) * self.vel.y
+        
+        self.net_movement = Vector2(self.movement["right"] - self.movement["left"], self.movement["down"] - self.movement["up"])
+        
+        self.hitbox.x += self.dir().x * self.vel.x
+        for group in self.game.currentlevel.layers["collision"]:
+            for sprite in group.sprites():
+                if self.hitbox.colliderect(sprite.hitbox):
+                    if self.dir().x > 0:
+                        self.hitbox.right = sprite.hitbox.left
+                    if self.dir().x <= 0:
+                        self.hitbox.left = sprite.hitbox.right
+        
+        self.hitbox.y += self.dir().y * self.vel.y
+        for group in self.game.currentlevel.layers["collision"]:
+            for sprite in group.sprites():
+                if self.hitbox.colliderect(sprite.hitbox):
+                    if self.dir().y > 0:
+                        self.hitbox.bottom = sprite.hitbox.top
+                    if self.dir().y <= 0:
+                        self.hitbox.top = sprite.hitbox.bottom
+        
+        self.rect.topleft = self.hitbox.topleft
 
     def dir(self):
-        return Vector2((self.movement["right"] - self.movement["left"]), (self.movement["down"] - self.movement["up"]))
+        direction = Vector2((self.movement["right"] - self.movement["left"]), (self.movement["down"] - self.movement["up"]))
+        if direction.length(): direction = direction.normalize()
+        return direction
 
 
 class Player(KinematicBody):
@@ -25,7 +49,8 @@ class Player(KinematicBody):
         #----- Sprite set-up
         self.assets = self.game.assets["Ginger"]
         self.image = self.assets["idle"][0]
-        self.rect: Rect = Rect(self.pos, self.image.get_size())
+        self.rect = FRect(self.pos, self.image.get_size())
+        self.hitbox = self.rect.inflate(-2, -4)
         
         #----- Dictionaries for keeping track of key-inputs and facing direction
         self.moving = False
@@ -60,17 +85,26 @@ class Player(KinematicBody):
         if not self.dir().length() == 0:
             self.moving = True
             self.facing = self.movement.copy() # self.facing will contain last direction we moved before stopping
+        
+        # For pixel perfect movement
+        if self.dir().length():
+            self.old_movement = self.movement.copy()
+        else:
+            self.old_movement = self.going.copy()
+        
         self.movement = self.going.copy() # copy our key inputs into our movement inputs
+        
+        if not self.old_movement == self.movement:
+            self.hitbox.x = round(self.hitbox.x)
+            self.hitbox.y = round(self.hitbox.y)
+
+
+        # This KinematicBody update() method updates our position
+        super().update()
         
         # For sprites, we need to set self.image and self.rect every frame.
         # self.render() sets the self.image
         self.render()
-        
-        # Here we set self.rect to our current position and size
-        self.rect = Rect(self.pos, self.image.get_size())
-        
-        # This KinematicBody update() method updates our position
-        super().update()
     
     def render(self):
         if not self.moving:

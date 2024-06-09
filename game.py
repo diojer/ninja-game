@@ -3,7 +3,7 @@ from scripts.imports import *
 from scripts.tilemap import Tilemap
 from scripts.utils import Animation, get_spritesheet_images, load_image
 from scripts.entities import Player
-from scripts.sprite_group import Collection
+from scripts.camera import YSortCameraGroup
 
 DISPLAY_SCALE = 6
 
@@ -24,27 +24,43 @@ class Game:
                 "walk_d": Animation(get_spritesheet_images((16, 16), load_image("Ginger/walking_d.png")), 5),
                 "walk_u": Animation(get_spritesheet_images((16, 16), load_image("Ginger/walking_u.png")), 5),
                 "walk_s": Animation(get_spritesheet_images((16, 16), load_image("Ginger/walking_s.png")), 5)
+            },
+            "cave_girl": {
+                "idle": get_spritesheet_images((16, 16), load_image("cave_girl/idle.png")),
+                "walk_d": Animation(get_spritesheet_images((16, 16), load_image("cave_girl/walk_d.png"), True), 5),
+                "walk_u": Animation(get_spritesheet_images((16, 16), load_image("cave_girl/walk_u.png"), True), 5),
+                "walk_s": Animation(get_spritesheet_images((16, 16), load_image("cave_girl/walk_s.png"), True), 5)
             }
         }
         
         #------------ Sprites
         
-        self.foreground = Collection()
+        self.foreground = YSortCameraGroup(self)
+        self.background = YSortCameraGroup(self)
         self.player = Player(Vector2(0, 0), [self.foreground], self)
+
         
         #------------ Levels
         
-        self.level = Tilemap("rocky_plains")
+        self.levels = {
+            "rocky_plains": Tilemap("rocky_plains"),
+            "heart_level": Tilemap("heart_level")
+        }
+        self.set_level("rocky_plains")
+
 
     def run(self):
         while True:
             self.display.fill((150, 220, 255))
             
-            self.level.draw(self.screen)
+            # draw background
+            self.background.update(self.player)
+            self.background.draw(self.display)
             
             # Update all in the foreground
-            self.foreground.update()
+            self.foreground.update(self.player)
             self.foreground.draw(self.display)
+            
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -59,6 +75,10 @@ class Game:
                         self.player.going["down"] = True
                     if event.key == pygame.K_d:
                         self.player.going["right"] = True
+                    if event.key == pygame.K_l:
+                        self.set_level("heart_level")
+                    if event.key == pygame.K_r:
+                        self.set_level("rocky_plains")
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_w:
                         self.player.going["up"] = False
@@ -72,5 +92,18 @@ class Game:
             self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
             pygame.display.update()
             self.clock.tick(60) #60fps
-            
+    
+    def set_level(self, level_name: str):
+        self.currentlevel = self.levels[level_name]
+        self.foreground = YSortCameraGroup(self)
+        self.background = YSortCameraGroup(self)
+        self.foreground.add(self.player)
+        for type in self.currentlevel.layers:
+            for group in self.currentlevel.layers[type]:
+                for sprite in group.sprites():
+                    sprite.layer_name = type
+                    if type == "floor":
+                        self.background.add(sprite)
+                    else:
+                        self.foreground.add(sprite)
 Game().run()
