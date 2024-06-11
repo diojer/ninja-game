@@ -2,7 +2,7 @@ from scripts.imports import *
 
 from scripts.tilemap import Tilemap
 from scripts.utils import Animation, get_spritesheet_images, load_image
-from scripts.entities import AnimatedBody
+from scripts.entities import AnimatedBody, NPC
 from scripts.camera import YSortCameraGroup
 
 DISPLAY_SCALE = 6
@@ -30,6 +30,12 @@ class Game:
                 "walk_d": Animation(get_spritesheet_images((16, 16), load_image("cave_girl/walk_d.png"), True), 5),
                 "walk_u": Animation(get_spritesheet_images((16, 16), load_image("cave_girl/walk_u.png"), True), 5),
                 "walk_s": Animation(get_spritesheet_images((16, 16), load_image("cave_girl/walk_s.png"), True), 5)
+            },
+            "dalmatian": {
+                "idle": get_spritesheet_images((21, 19), load_image("dalmatian/idle.png")),
+                "walk_d": Animation(get_spritesheet_images((21, 19), load_image("dalmatian/walk_d.png")), 2),
+                "walk_u": Animation(get_spritesheet_images((21, 19), load_image("dalmatian/walk_u.png")), 2),
+                "walk_s": Animation(get_spritesheet_images((21, 19), load_image("dalmatian/walk_s.png")), 2)
             }
         }
         
@@ -38,6 +44,14 @@ class Game:
         self.foreground = YSortCameraGroup(self)
         self.background = YSortCameraGroup(self)
         self.player = AnimatedBody(Vector2(0, 0), [self.foreground], self, "Ginger")
+        self.characters = [
+            NPC(Vector2(140, 140), [self.foreground], self, "dalmatian")
+        ]
+        
+            #--- Adding all entities to an array for ease of use.
+        self.entities = []
+        self.entities.append(self.player)
+        self.entities.extend(self.characters)
 
         
         #------------ Levels
@@ -58,6 +72,10 @@ class Game:
             
             # Update all in the foreground
             self.foreground.update(self.player)
+            
+            for character in self.characters:
+                character.walk_random()
+            
             self.foreground.draw(self.display)
             
             
@@ -96,7 +114,12 @@ class Game:
         self.currentlevel = self.levels[level_name]
         self.foreground = YSortCameraGroup(self)
         self.background = YSortCameraGroup(self)
-        self.foreground.add(self.player)
+        
+        #---- Adding Player and NPCs
+        for entity in self.entities:
+            self.foreground.add(entity)
+        
+        #---- Setting the map
         for type in self.currentlevel.layers:
             for group in self.currentlevel.layers[type]:
                 for sprite in group.sprites():

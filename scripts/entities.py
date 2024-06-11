@@ -1,4 +1,5 @@
 from .imports import *
+import random
 
 class KinematicBody(pygame.sprite.Sprite):
     def __init__(self, pos, groups, game: "Game"):
@@ -141,3 +142,64 @@ class AnimatedBody(KinematicBody):
                 self.flip = True
             elif self.facing["left"]:
                 self.flip = False
+
+class NPC(AnimatedBody):
+    def __init__(self, pos, groups, game: "Game", asset: str, aggressive: bool = False):
+        super().__init__(pos, groups, game, asset)
+        self.timer = pygame.time.Clock()
+        self.aggressive = aggressive
+        
+        # Ticks the clock for the first time
+        self.timer.tick()
+        self.time_walking = 0
+        self.walk_time = 750
+        
+        # Picks a random direction to look in
+        self.face_random()
+    
+    def face_random(self):
+        new_dir = random.randint(0, 3)
+        
+        dir_dict = {
+            0: "down",
+            1: "up",
+            2: "left",
+            3: "right"
+        }
+        
+        # Sets randomly chosen direction as the current facing direction.
+        # All other directions get set to false.
+        for dir in self.facing:
+            if dir == dir_dict[new_dir]:
+                if self.facing[dir]:
+                    self.face_random()
+                else:
+                    self.facing[dir] = True
+            else:
+                self.facing[dir] = False
+    
+    def walk_random(self):
+        # The tick function returns the time, in milliseconds, since the clock last ticked.
+        self.time_walking += self.timer.tick()
+        
+        # If we've been walking for over 1.5s, we pause for one second.
+        if self.time_walking > self.walk_time:
+            
+            for dir in self.going:
+                self.going[dir] = False
+            
+            # After one second has passed:
+            if self.time_walking > (self.walk_time + 1000):
+                
+                # Essentially flips a coin. If 1, then a new direction will be picked.
+                # if random.choice((0, 1)):
+                    
+                    # Picks a random number between 0 and 4 and matches with a direction
+                self.face_random()
+                    
+                # Resets the walking time
+                self.time_walking = 0
+
+        # If we haven't been walking for over 2.5 seconds, keep going.
+        else:
+            self.going = self.facing.copy()
