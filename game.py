@@ -2,7 +2,7 @@ from scripts.imports import *
 
 from scripts.tilemap import Tilemap
 from scripts.utils import Animation, get_spritesheet_images, load_image
-from scripts.entities import Player
+from scripts.entities import AnimatedBody
 from scripts.camera import YSortCameraGroup
 
 DISPLAY_SCALE = 6
@@ -37,7 +37,7 @@ class Game:
         
         self.foreground = YSortCameraGroup(self)
         self.background = YSortCameraGroup(self)
-        self.player = Player(Vector2(0, 0), [self.foreground], self)
+        self.player = AnimatedBody(Vector2(0, 0), [self.foreground], self, "Ginger")
 
         
         #------------ Levels
@@ -47,7 +47,6 @@ class Game:
             "heart_level": Tilemap("heart_level")
         }
         self.set_level("rocky_plains")
-
 
     def run(self):
         while True:
