@@ -1,5 +1,5 @@
 from .imports import *
-from .utils import dir_dict
+from .utils import dir_dict, dir_dict_trans
 
 import random
 
@@ -11,24 +11,24 @@ class KinematicBody(pygame.sprite.Sprite):
         super().__init__(groups)
         self.pos: Vector2 = pos
         self.game: "Game" = game
-        self.movement = dict(left = False, right = False, up = False, down = False).copy()
+        self.movement = dir_dict.copy()
+        self.colliding = dir_dict.copy()
         self.vel: Vector2 = Vector2(1, 1)
         self.rect: FRect
         self.hitbox: FRect
 
     def update(self):
         
-        # We increment x and y separately for collision detection reasons.
-        
-        self.net_movement = Vector2(self.movement["right"] - self.movement["left"], self.movement["down"] - self.movement["up"])
-        
+        # We increment x and y separately for collision detection reasons.        
         self.hitbox.x += self.dir().x * self.vel.x
         for group in self.game.currentlevel.layers["collision"]:
             for sprite in group.sprites():
                 if self.hitbox.colliderect(sprite.hitbox):
                     if self.dir().x > 0:
+                        self.colliding["right"] = True
                         self.hitbox.right = sprite.hitbox.left
                     if self.dir().x <= 0:
+                        self.colliding["left"] = True
                         self.hitbox.left = sprite.hitbox.right
         
         self.hitbox.y += self.dir().y * self.vel.y
@@ -36,8 +36,10 @@ class KinematicBody(pygame.sprite.Sprite):
             for sprite in group.sprites():
                 if self.hitbox.colliderect(sprite.hitbox):
                     if self.dir().y > 0:
+                        self.colliding["down"] = True
                         self.hitbox.bottom = sprite.hitbox.top
                     if self.dir().y <= 0:
+                        self.colliding["up"] = True
                         self.hitbox.top = sprite.hitbox.bottom
         
         self.rect.topleft = self.hitbox.topleft
@@ -46,6 +48,9 @@ class KinematicBody(pygame.sprite.Sprite):
         direction = Vector2((self.movement["right"] - self.movement["left"]), (self.movement["down"] - self.movement["up"]))
         if direction.length(): direction = direction.normalize()
         return direction
+
+    def reset_collisions(self):
+        self.colliding = dir_dict.copy()
 
 class AnimatedBody(KinematicBody):
     def __init__(self, pos, groups, game: "Game", asset: str):
@@ -62,8 +67,8 @@ class AnimatedBody(KinematicBody):
         
         #----- Dictionaries for keeping track of key-inputs and facing direction
         self.moving = False
-        self.going = dict(left = False, right = False, up = False, down = False).copy()
-        self.facing = dict(left = False, right = False, up = False, down = False).copy()
+        self.going = dir_dict.copy()
+        self.facing = dir_dict.copy()
         
         #----- Animation
         self.action: str = ""
@@ -178,7 +183,8 @@ class NPC(AnimatedBody):
         self.instructions: list[str] | None = None
         
         # We want to use Rects for NPCs rather than FRects
-        self.rect = Rect(self.pos, self.image.get_size())
+        # self.rect = Rect(self.pos, self.image.get_size())
+        # self.hitbox = self.hitbox = self.rect.inflate(-2, -4)
 
     
     def face_random(self):
@@ -188,14 +194,12 @@ class NPC(AnimatedBody):
         
         # Sets randomly chosen direction as the current facing direction.
         # All other directions get set to false.
-        for dir in self.facing:
-            if dir == dir_dict[new_dir]:
-                if self.facing[dir]:
-                    self.face_random()
-                else:
-                    self.facing[dir] = True
-            else:
-                self.facing[dir] = False
+        
+        self.facing = dir_dict.copy()
+        if self.facing[dir_dict_trans[new_dir]]:
+            self.face_random()
+        else:
+            self.facing[dir_dict_trans[new_dir]] = True
     
     def instruct(self, instruction_str: str, important: bool = False):
 #   Possible instructions:
@@ -228,8 +232,7 @@ class NPC(AnimatedBody):
                 self.waiting = False
                 return True
             else:
-                for direction in self.going:
-                    self.going[direction] = False
+                self.going = dir_dict.copy()
                 
                 # Keep returning false so that the command is not .pop()'d from the list
                 return False
@@ -321,7 +324,7 @@ class NPC(AnimatedBody):
                     completed = go(cmd_time, cmd_dir)
                 else:
                     # Too many/too few arguments given
-                    raise Exception(f"Error in NPC instruct(): g command has {len(parameters)} arguments")
+                    raise Exception(f"Error in NPC instruct(): g command given {len(parameters)} arguments when 2 are required")
             case "w":
                 # parameters[1] contains the time to wait for
                 cmd_time = int(parameters[1])

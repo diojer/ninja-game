@@ -1,5 +1,7 @@
 from .imports import *
 
+from .utils import round_vector
+
 if TYPE_CHECKING:
     from .tilemap import Tile
 
@@ -16,11 +18,12 @@ class YSortCameraGroup(pygame.sprite.Group):
         for sprite in sorted(self.sprites(), key=lambda sprite: sprite.rect.centery):
             if hasattr(sprite, "flip"):
                 surf.blit(pygame.transform.flip(sprite.image, sprite.flip, False), sprite.rect.topleft - self.offset)
-            if hasattr(sprite, "layer_name"):
-                if "top" in sprite.layer_name:
-                    top_layer.append(sprite)
-                else:
-                    surf.blit(sprite.image, sprite.rect.topleft - self.offset)
+            else:
+                if hasattr(sprite, "layer_name"):
+                    if "top" in sprite.layer_name:
+                        top_layer.append(sprite)
+                    else:
+                        surf.blit(sprite.image, sprite.rect.topleft - self.offset)
         for tile in top_layer:
             surf.blit(tile.image, tile.rect.topleft - self.offset)
 

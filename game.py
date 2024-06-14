@@ -5,7 +5,8 @@ from scripts.utils import Animation, get_spritesheet_images, load_image
 from scripts.entities import AnimatedBody, NPC, Player
 from scripts.camera import YSortCameraGroup
 
-DISPLAY_SCALE = 6
+DISPLAY_SCALE = 5
+
 
 class Game:
     def __init__(self) -> None:
@@ -44,6 +45,7 @@ class Game:
         self.foreground = YSortCameraGroup(self)
         self.background = YSortCameraGroup(self)
         self.player = Player(Vector2(0, 0), [self.foreground], self, "Ginger")
+        self.player.vel = Vector2(1.5, 1.5)
         self.characters = [
             NPC(Vector2(20, 20), [self.foreground], self, "dalmatian")
         ]
@@ -62,6 +64,7 @@ class Game:
         }
         self.set_level("rocky_plains")
 
+
     def run(self):
         while True:
             self.display.fill((150, 220, 255))
@@ -74,7 +77,7 @@ class Game:
             self.foreground.update(self.player)
             
             for character in self.characters:
-                character.instruct("f,r/g,1000/f,d/g,1000/f,r/g,1500/f,l/g,1500/f,u/g,1000/f,l/g,1000/w,2000")
+                character.instruct("f,r/g,2500/f,l/g,2500/w,5000")
             
             self.foreground.draw(self.display)
             
