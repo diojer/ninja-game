@@ -101,3 +101,10 @@ class Animation:
 
 def round_vector(vector: Vector2):
     return Vector2(round(vector.x), round(vector.y)).copy()
+
+dir_dict = {
+    0: "down",
+    1: "up",
+    2: "left",
+    3: "right"
+}

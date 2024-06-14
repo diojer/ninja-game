@@ -1,12 +1,17 @@
 from .imports import *
+from .utils import dir_dict
+
 import random
+
+
+            
 
 class KinematicBody(pygame.sprite.Sprite):
     def __init__(self, pos, groups, game: "Game"):
         super().__init__(groups)
         self.pos: Vector2 = pos
         self.game: "Game" = game
-        self.movement = dict(left = False, right = False, up = False, down = False)
+        self.movement = dict(left = False, right = False, up = False, down = False).copy()
         self.vel: Vector2 = Vector2(1, 1)
         self.rect: FRect
         self.hitbox: FRect
@@ -57,8 +62,8 @@ class AnimatedBody(KinematicBody):
         
         #----- Dictionaries for keeping track of key-inputs and facing direction
         self.moving = False
-        self.going = dict(left = False, right = False, up = False, down = False)
-        self.facing = dict(left = False, right = False, up = False, down = False)
+        self.going = dict(left = False, right = False, up = False, down = False).copy()
+        self.facing = dict(left = False, right = False, up = False, down = False).copy()
         
         #----- Animation
         self.action: str = ""
@@ -87,7 +92,6 @@ class AnimatedBody(KinematicBody):
         #---- Check if we are moving
         if not self.dir().length() == 0:
             self.moving = True
-            self.facing = self.movement.copy() # self.facing will contain last direction we moved before stopping
         
         # For pixel perfect movement
         if self.dir().length():
@@ -143,6 +147,22 @@ class AnimatedBody(KinematicBody):
             elif self.facing["left"]:
                 self.flip = False
 
+class Player(AnimatedBody):
+    def __init__(self, pos, groups, game: "Game", asset: str):
+        super().__init__(pos, groups, game, asset)
+    
+    # Slight problem with the AnimatedBody class:
+        # We want the player's facing direction to be the direction they last moved.
+        # But we want to be able to set NPC's facing direction.
+        # Player class creates this distinction.
+    def update(self):
+        
+        #---- Check if we are moving
+        if not self.dir().length() == 0:
+            self.facing = self.movement.copy() # self.facing will contain last direction we moved before stopping
+        
+        super().update()
+
 class NPC(AnimatedBody):
     def __init__(self, pos, groups, game: "Game", asset: str, aggressive: bool = False):
         super().__init__(pos, groups, game, asset)
@@ -151,21 +171,20 @@ class NPC(AnimatedBody):
         
         # Ticks the clock for the first time
         self.timer.tick()
-        self.time_walking = 0
-        self.walk_time = 750
+        self.time_waiting = 0
+        self.waiting = False
         
-        # Picks a random direction to look in
-        self.face_random()
+        # Instructions set if the NPC is given walk commands
+        self.instructions: list[str] | None = None
+        
+        # We want to use Rects for NPCs rather than FRects
+        self.rect = Rect(self.pos, self.image.get_size())
+
     
     def face_random(self):
         new_dir = random.randint(0, 3)
         
-        dir_dict = {
-            0: "down",
-            1: "up",
-            2: "left",
-            3: "right"
-        }
+        
         
         # Sets randomly chosen direction as the current facing direction.
         # All other directions get set to false.
@@ -178,28 +197,148 @@ class NPC(AnimatedBody):
             else:
                 self.facing[dir] = False
     
-    def walk_random(self):
-        # The tick function returns the time, in milliseconds, since the clock last ticked.
-        self.time_walking += self.timer.tick()
+    def instruct(self, instruction_str: str, important: bool = False):
+#   Possible instructions:
+#         f         : face
+#         g         : go
+#             u,d,l,r,* : up, down, left, right, random
+#                       : go followed by nothing goes forward
+#                       : go syntax looks like, e.g., /g,2,u/ where 2 = number of seconds to go for.
+#                       : face syntax looks like, e.g., /f,d/
+#         w         : wait
+#                       : wait is followed by a number
+#         /         : separate commands
         
-        # If we've been walking for over 1.5s, we pause for one second.
-        if self.time_walking > self.walk_time:
+        # ----------- Writing out functionality for the instructions
+        
+        # All of the following functions (wait, go, face) will return True when they've completed their action and False when they need more time to finish.
+        def wait(time: int):
             
-            for dir in self.going:
-                self.going[dir] = False
-            
-            # After one second has passed:
-            if self.time_walking > (self.walk_time + 1000):
+            # On the first time we call wait(), set self.waiting = True
+            if not self.waiting:
+                self.waiting = True
                 
-                # Essentially flips a coin. If 1, then a new direction will be picked.
-                # if random.choice((0, 1)):
-                    
-                    # Picks a random number between 0 and 4 and matches with a direction
+                # Clock ticks so we'll know exactly how long we've been waiting for
+                self.timer.tick()
+            
+            # Record the amount of time since the command began
+            self.time_waiting += self.timer.tick()
+            if self.time_waiting > time:
+                # The time has passed
+                self.waiting = False
+                return True
+            else:
+                for direction in self.going:
+                    self.going[direction] = False
+                
+                # Keep returning false so that the command is not .pop()'d from the list
+                return False
+        
+        def go( time: int, dir: str | None = None):
+            
+            if not self.waiting:
+                self.waiting = True
+                self.timer.tick()
+            
+            
+            self.time_waiting += self.timer.tick()
+            if self.time_waiting > time:
+                # The time has passed
+                self.waiting = False
+                return True
+            else:
+                # Keep walking
+                
+                # If a direction was provided:
+                if dir:
+                    for direction in self.going:
+                        
+                        # If dir = u and direction = up, e.g., this will be true:
+                        if dir == direction[0]:
+                            self.going[direction] = True
+                        else:
+                            self.going[direction] = False
+                
+                # If no direction was provided:
+                else:
+                    self.going = self.facing.copy()
+                return False
+            
+            
+        
+        def face(dir: str):
+            if dir == "*":
                 self.face_random()
+                return True
+            for direction in self.facing:
+                if dir == direction[0]:
+                    # If dir = u and direction = up, e.g., this will be true.
+                    self.facing[direction] = True
                     
-                # Resets the walking time
-                self.time_walking = 0
+                    # Instructions only allow one direction, so we can stop checking once one is found
+                else:
+                    self.facing[direction] = False
+            return True
+        # -----------
 
-        # If we haven't been walking for over 2.5 seconds, keep going.
-        else:
-            self.going = self.facing.copy()
+        if (not self.instructions) or important:
+            # If there are no current instructions restart the instructions
+            # Or, if the instructions are important.
+            
+            self.instructions = instruction_str.split("/")
+        
+        # Instructions are stored in an array.
+        # Every time self.instruct() is called, the latest instruction is executed.
+            # Once it has finished being executed it is removed from the array
+        # Once the array is empty self.instructions is set to None.
+        # This allows it to be reset.
+        
+        parameters = self.instructions[0].split(",")
+        # The first element, parameters[0] is a character representing the command
+        # The second/third elements vary depending on the initial command
+        
+        # the completed variable records whether the chosen command function returns True or False
+        completed = False
+        match parameters[0]:
+            case "f":
+                # parameters[1] in this case contains the direction
+                cmd_dir = parameters[1]
+                completed = face(cmd_dir)
+                
+            case "g":
+                if len(parameters) == 2:
+                    # No direction included
+                    
+                    # parameters[1] contains the time to go for
+                    cmd_time = int(parameters[1])
+                    completed = go(cmd_time)
+                elif len(parameters) == 3:
+                    # Direction included
+                    
+                    # parameters[1] is the time to go for and parameters[2] is the direction to go
+                    cmd_time = int(parameters[1])
+                    cmd_dir = parameters[2]
+                    completed = go(cmd_time, cmd_dir)
+                else:
+                    # Too many/too few arguments given
+                    raise Exception(f"Error in NPC instruct(): g command has {len(parameters)} arguments")
+            case "w":
+                # parameters[1] contains the time to wait for
+                cmd_time = int(parameters[1])
+                completed = wait(cmd_time)
+            case _:
+                raise Exception(f"Error in NPC instruct(): command {parameters[0]} does not exist.")
+        if completed:
+            # If our command is completed, we remove the top action from the list
+            self.instructions.pop(0)
+            
+            # We also have to reset the self.time_waiting so that we can start counting from the
+                # beginning of the next command
+            self.time_waiting = 0
+            
+            # If the list is now empty:
+            if not self.instructions:
+                self.instructions = None
+        
+        
+        

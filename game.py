@@ -2,7 +2,7 @@ from scripts.imports import *
 
 from scripts.tilemap import Tilemap
 from scripts.utils import Animation, get_spritesheet_images, load_image
-from scripts.entities import AnimatedBody, NPC
+from scripts.entities import AnimatedBody, NPC, Player
 from scripts.camera import YSortCameraGroup
 
 DISPLAY_SCALE = 6
@@ -33,9 +33,9 @@ class Game:
             },
             "dalmatian": {
                 "idle": get_spritesheet_images((21, 19), load_image("dalmatian/idle.png")),
-                "walk_d": Animation(get_spritesheet_images((21, 19), load_image("dalmatian/walk_d.png")), 2),
-                "walk_u": Animation(get_spritesheet_images((21, 19), load_image("dalmatian/walk_u.png")), 2),
-                "walk_s": Animation(get_spritesheet_images((21, 19), load_image("dalmatian/walk_s.png")), 2)
+                "walk_d": Animation(get_spritesheet_images((21, 19), load_image("dalmatian/walk_d.png")), 3),
+                "walk_u": Animation(get_spritesheet_images((21, 19), load_image("dalmatian/walk_u.png")), 3),
+                "walk_s": Animation(get_spritesheet_images((21, 19), load_image("dalmatian/walk_s.png")), 3)
             }
         }
         
@@ -43,9 +43,9 @@ class Game:
         
         self.foreground = YSortCameraGroup(self)
         self.background = YSortCameraGroup(self)
-        self.player = AnimatedBody(Vector2(0, 0), [self.foreground], self, "Ginger")
+        self.player = Player(Vector2(0, 0), [self.foreground], self, "Ginger")
         self.characters = [
-            NPC(Vector2(140, 140), [self.foreground], self, "dalmatian")
+            NPC(Vector2(20, 20), [self.foreground], self, "dalmatian")
         ]
         
             #--- Adding all entities to an array for ease of use.
@@ -74,7 +74,7 @@ class Game:
             self.foreground.update(self.player)
             
             for character in self.characters:
-                character.walk_random()
+                character.instruct("f,r/g,1000/f,d/g,1000/f,r/g,1500/f,l/g,1500/f,u/g,1000/f,l/g,1000/w,2000")
             
             self.foreground.draw(self.display)
             
