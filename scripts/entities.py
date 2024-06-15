@@ -3,6 +3,8 @@ from .utils import dir_dict, dir_dict_trans
 
 import random
 
+if TYPE_CHECKING:
+    from .tilemap import Tile
 
             
 
@@ -98,7 +100,7 @@ class AnimatedBody(KinematicBody):
         if not self.dir().length() == 0:
             self.moving = True
         
-        # For pixel perfect movement
+        #-------------- For pixel perfect movement
         if self.dir().length():
             self.old_movement = self.movement.copy()
         else:
@@ -110,6 +112,7 @@ class AnimatedBody(KinematicBody):
             self.hitbox.x = round(self.hitbox.x)
             self.hitbox.y = round(self.hitbox.y)
 
+        #--------------
 
         # This KinematicBody update() method updates our position
         super().update()
@@ -155,6 +158,10 @@ class AnimatedBody(KinematicBody):
 class Player(AnimatedBody):
     def __init__(self, pos, groups, game: "Game", asset: str):
         super().__init__(pos, groups, game, asset)
+        self.prox = self.rect.inflate(20, 20) # self.prox will be a hitbox used to interact with objects/NPCs
+        self.interactables: list[NPC | "Tile"] = []
+        self.interactables.extend(self.game.characters) # Adds all NPCs to things we can interact with
+        self.interaction: function | None = None
     
     # Slight problem with the AnimatedBody class:
         # We want the player's facing direction to be the direction they last moved.
@@ -165,8 +172,24 @@ class Player(AnimatedBody):
         #---- Check if we are moving
         if not self.dir().length() == 0:
             self.facing = self.movement.copy() # self.facing will contain last direction we moved before stopping
+            
+        #-------------- Checking interaction collisions
+        
+        found_interaction = False
+        for interactable in self.interactables:
+            if self.prox.colliderect(interactable.hitbox):
+                self.interaction = interactable.interaction
+                found_interaction = True
+        
+        if not found_interaction:
+            self.interaction = None
         
         super().update()
+        
+        self.prox.center = self.hitbox.center
+        
+        if self.game.debug:
+            pygame.draw.rect(self.game.display, "red", self.prox.move(-self.game.foreground.offset.x, -self.game.foreground.offset.y), 1)
 
 class NPC(AnimatedBody):
     def __init__(self, pos, groups, game: "Game", asset: str, aggressive: bool = False):
@@ -181,10 +204,7 @@ class NPC(AnimatedBody):
         
         # Instructions set if the NPC is given walk commands
         self.instructions: list[str] | None = None
-        
-        # We want to use Rects for NPCs rather than FRects
-        # self.rect = Rect(self.pos, self.image.get_size())
-        # self.hitbox = self.hitbox = self.rect.inflate(-2, -4)
+        self.paused: bool = False # Paused will be set to true when we're interacting with NPCs.
 
     
     def face_random(self):
@@ -300,48 +320,51 @@ class NPC(AnimatedBody):
         # The first element, parameters[0] is a character representing the command
         # The second/third elements vary depending on the initial command
         
-        # the completed variable records whether the chosen command function returns True or False
-        completed = False
-        match parameters[0]:
-            case "f":
-                # parameters[1] in this case contains the direction
-                cmd_dir = parameters[1]
-                completed = face(cmd_dir)
+        
+        if not self.paused:
+            # the completed variable records whether the chosen command function returns True or False
+            completed = False
+            match parameters[0]:
+                case "f":
+                    # parameters[1] in this case contains the direction
+                    cmd_dir = parameters[1]
+                    completed = face(cmd_dir)
+                    
+                case "g":
+                    if len(parameters) == 2:
+                        # No direction included
+                        
+                        # parameters[1] contains the time to go for
+                        cmd_time = int(parameters[1])
+                        completed = go(cmd_time)
+                    elif len(parameters) == 3:
+                        # Direction included
+                        
+                        # parameters[1] is the time to go for and parameters[2] is the direction to go
+                        cmd_time = int(parameters[1])
+                        cmd_dir = parameters[2]
+                        completed = go(cmd_time, cmd_dir)
+                    else:
+                        # Too many/too few arguments given
+                        raise Exception(f"Error in NPC instruct(): g command given {len(parameters)} arguments when 2 are required")
+                case "w":
+                    # parameters[1] contains the time to wait for
+                    cmd_time = int(parameters[1])
+                    completed = wait(cmd_time)
+                case _:
+                    raise Exception(f"Error in NPC instruct(): command {parameters[0]} does not exist.")
+            if completed:
+                # If our command is completed, we remove the top action from the list
+                self.instructions.pop(0)
                 
-            case "g":
-                if len(parameters) == 2:
-                    # No direction included
-                    
-                    # parameters[1] contains the time to go for
-                    cmd_time = int(parameters[1])
-                    completed = go(cmd_time)
-                elif len(parameters) == 3:
-                    # Direction included
-                    
-                    # parameters[1] is the time to go for and parameters[2] is the direction to go
-                    cmd_time = int(parameters[1])
-                    cmd_dir = parameters[2]
-                    completed = go(cmd_time, cmd_dir)
-                else:
-                    # Too many/too few arguments given
-                    raise Exception(f"Error in NPC instruct(): g command given {len(parameters)} arguments when 2 are required")
-            case "w":
-                # parameters[1] contains the time to wait for
-                cmd_time = int(parameters[1])
-                completed = wait(cmd_time)
-            case _:
-                raise Exception(f"Error in NPC instruct(): command {parameters[0]} does not exist.")
-        if completed:
-            # If our command is completed, we remove the top action from the list
-            self.instructions.pop(0)
+                # We also have to reset the self.time_waiting so that we can start counting from the
+                    # beginning of the next command
+                self.time_waiting = 0
+                
+                # If the list is now empty:
+                if not self.instructions:
+                    self.instructions = None
             
-            # We also have to reset the self.time_waiting so that we can start counting from the
-                # beginning of the next command
-            self.time_waiting = 0
-            
-            # If the list is now empty:
-            if not self.instructions:
-                self.instructions = None
-        
-        
+    def interaction(self):
+        print("test")
         

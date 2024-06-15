@@ -9,12 +9,13 @@ DISPLAY_SCALE = 5
 
 
 class Game:
-    def __init__(self) -> None:
+    def __init__(self, debug: bool = False) -> None:
         pygame.init()
         self.screen_size: tuple = (1280, 720)
         self.screen = pygame.display.set_mode((self.screen_size[0], self.screen_size[1]), pygame.RESIZABLE)
         self.display = pygame.Surface((self.screen_size[0]//DISPLAY_SCALE, self.screen_size[1]//DISPLAY_SCALE))
         self.clock = pygame.time.Clock()
+        self.debug = debug
         pygame.display.set_caption("Ninja Game")
         
         #------------ Assets
@@ -37,6 +38,18 @@ class Game:
                 "walk_d": Animation(get_spritesheet_images((21, 19), load_image("dalmatian/walk_d.png")), 3),
                 "walk_u": Animation(get_spritesheet_images((21, 19), load_image("dalmatian/walk_u.png")), 3),
                 "walk_s": Animation(get_spritesheet_images((21, 19), load_image("dalmatian/walk_s.png")), 3)
+            },
+            "knight": {
+                "idle": get_spritesheet_images((16, 20), load_image("knight/idle.png")),
+                "walk_d": Animation(get_spritesheet_images((16, 20), load_image("knight/walk_d.png")), 5),
+                "walk_u": Animation(get_spritesheet_images((16, 20), load_image("knight/walk_u.png")), 5),
+                "walk_s": Animation(get_spritesheet_images((16, 20), load_image("knight/walk_s.png")), 5)
+            },
+            "wizard": {
+                "idle": get_spritesheet_images((16, 20), load_image("wizard/idle.png")),
+                "walk_d": Animation(get_spritesheet_images((16, 20), load_image("wizard/walk_d.png")), 5),
+                "walk_u": Animation(get_spritesheet_images((16, 20), load_image("wizard/walk_u.png")), 5),
+                "walk_s": Animation(get_spritesheet_images((16, 20), load_image("wizard/walk_s.png")), 5)
             }
         }
         
@@ -44,11 +57,15 @@ class Game:
         
         self.foreground = YSortCameraGroup(self)
         self.background = YSortCameraGroup(self)
+        
+        self.characters = [
+            NPC(Vector2(20, 20), [self.foreground], self, "dalmatian"),
+            NPC(Vector2(35, 40), [self.foreground], self, "knight"),
+            NPC(Vector2(25, 60), [self.foreground], self, "wizard")
+        ]
+        
         self.player = Player(Vector2(0, 0), [self.foreground], self, "Ginger")
         self.player.vel = Vector2(1.5, 1.5)
-        self.characters = [
-            NPC(Vector2(20, 20), [self.foreground], self, "dalmatian")
-        ]
         
             #--- Adding all entities to an array for ease of use.
         self.entities = []
@@ -77,7 +94,7 @@ class Game:
             self.foreground.update(self.player)
             
             for character in self.characters:
-                character.instruct("f,r/g,2500/f,l/g,2500/w,5000")
+                character.instruct("f,r/g,1000/w,2000/f,d/g,2000/w,1000/f,u/g,2000/f,l/g,1000/w,2000")
             
             self.foreground.draw(self.display)
             
@@ -131,4 +148,4 @@ class Game:
                         self.background.add(sprite)
                     else:
                         self.foreground.add(sprite)
-Game().run()
+Game(debug=True).run()
