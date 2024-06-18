@@ -39,7 +39,7 @@ def get_sheet_images(size: tuple, sheet: pygame.Surface) -> list[list[pygame.Sur
         sheet (pygame.Surface): Tile sheet
 
     Returns:
-        list[list[pygame.Surface]]: List of pygame Surface objects
+        list[list[pygame.Surface]]: List of a list of pygame Surface objects
     """
     
     img_list: list[list[pygame.Surface]] = []

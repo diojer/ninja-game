@@ -188,7 +188,7 @@ class Player(AnimatedBody):
         
         self.prox.center = self.hitbox.center
         
-        if self.game.debug:
+        if DEBUG:
             pygame.draw.rect(self.game.display, "red", self.prox.move(-self.game.foreground.offset.x, -self.game.foreground.offset.y), 1)
 
 class NPC(AnimatedBody):
@@ -217,6 +217,7 @@ class NPC(AnimatedBody):
         
         self.facing = dir_dict.copy()
         if self.facing[dir_dict_trans[new_dir]]:
+            # If we randomly select the direction already being faced pick a new random direction.
             self.face_random()
         else:
             self.facing[dir_dict_trans[new_dir]] = True
@@ -227,7 +228,7 @@ class NPC(AnimatedBody):
 #         g         : go
 #             u,d,l,r,* : up, down, left, right, random
 #                       : go followed by nothing goes forward
-#                       : go syntax looks like, e.g., /g,2,u/ where 2 = number of seconds to go for.
+#                       : go syntax looks like, e.g., /g,2000,u/ where 2000 = number of milliseconds to go for.
 #                       : face syntax looks like, e.g., /f,d/
 #         w         : wait
 #                       : wait is followed by a number
@@ -298,7 +299,6 @@ class NPC(AnimatedBody):
                     # If dir = u and direction = up, e.g., this will be true.
                     self.facing[direction] = True
                     
-                    # Instructions only allow one direction, so we can stop checking once one is found
                 else:
                     self.facing[direction] = False
             return True
@@ -346,7 +346,7 @@ class NPC(AnimatedBody):
                         completed = go(cmd_time, cmd_dir)
                     else:
                         # Too many/too few arguments given
-                        raise Exception(f"Error in NPC instruct(): g command given {len(parameters)} arguments when 2 are required")
+                        raise Exception(f"Error in NPC instruct(): g command given {len(parameters)} arguments")
                 case "w":
                     # parameters[1] contains the time to wait for
                     cmd_time = int(parameters[1])
@@ -364,7 +364,7 @@ class NPC(AnimatedBody):
                 # If the list is now empty:
                 if not self.instructions:
                     self.instructions = None
-            
+
     def interaction(self):
-        print("test")
+        pass
         

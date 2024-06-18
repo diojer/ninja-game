@@ -5,58 +5,27 @@ from scripts.utils import Animation, get_spritesheet_images, load_image
 from scripts.entities import AnimatedBody, NPC, Player
 from scripts.camera import YSortCameraGroup
 
-DISPLAY_SCALE = 5
+
 
 
 class Game:
-    def __init__(self, debug: bool = False) -> None:
+    def __init__(self) -> None:
         pygame.init()
-        self.screen_size: tuple = (1280, 720)
-        self.screen = pygame.display.set_mode((self.screen_size[0], self.screen_size[1]), pygame.RESIZABLE)
+        self.screen_size: tuple = (SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.screen = pygame.display.set_mode((self.screen_size[0], self.screen_size[1]))
         self.display = pygame.Surface((self.screen_size[0]//DISPLAY_SCALE, self.screen_size[1]//DISPLAY_SCALE))
         self.clock = pygame.time.Clock()
-        self.debug = debug
-        pygame.display.set_caption("Ninja Game")
+        pygame.display.set_caption(GAME_CAPTION)
         
         #------------ Assets
         
-        self.assets: dict[str, dict[str, Animation | list[pygame.Surface]]] = {
-            "Ginger": {
-                "idle": get_spritesheet_images((16, 16), load_image("Ginger/idle.png")),
-                "walk_d": Animation(get_spritesheet_images((16, 16), load_image("Ginger/walking_d.png")), 5),
-                "walk_u": Animation(get_spritesheet_images((16, 16), load_image("Ginger/walking_u.png")), 5),
-                "walk_s": Animation(get_spritesheet_images((16, 16), load_image("Ginger/walking_s.png")), 5)
-            },
-            "cave_girl": {
-                "idle": get_spritesheet_images((16, 16), load_image("cave_girl/idle.png")),
-                "walk_d": Animation(get_spritesheet_images((16, 16), load_image("cave_girl/walk_d.png"), True), 5),
-                "walk_u": Animation(get_spritesheet_images((16, 16), load_image("cave_girl/walk_u.png"), True), 5),
-                "walk_s": Animation(get_spritesheet_images((16, 16), load_image("cave_girl/walk_s.png"), True), 5)
-            },
-            "dalmatian": {
-                "idle": get_spritesheet_images((21, 19), load_image("dalmatian/idle.png")),
-                "walk_d": Animation(get_spritesheet_images((21, 19), load_image("dalmatian/walk_d.png")), 3),
-                "walk_u": Animation(get_spritesheet_images((21, 19), load_image("dalmatian/walk_u.png")), 3),
-                "walk_s": Animation(get_spritesheet_images((21, 19), load_image("dalmatian/walk_s.png")), 3)
-            },
-            "knight": {
-                "idle": get_spritesheet_images((16, 20), load_image("knight/idle.png")),
-                "walk_d": Animation(get_spritesheet_images((16, 20), load_image("knight/walk_d.png")), 5),
-                "walk_u": Animation(get_spritesheet_images((16, 20), load_image("knight/walk_u.png")), 5),
-                "walk_s": Animation(get_spritesheet_images((16, 20), load_image("knight/walk_s.png")), 5)
-            },
-            "wizard": {
-                "idle": get_spritesheet_images((16, 20), load_image("wizard/idle.png")),
-                "walk_d": Animation(get_spritesheet_images((16, 20), load_image("wizard/walk_d.png")), 5),
-                "walk_u": Animation(get_spritesheet_images((16, 20), load_image("wizard/walk_u.png")), 5),
-                "walk_s": Animation(get_spritesheet_images((16, 20), load_image("wizard/walk_s.png")), 5)
-            }
-        }
+        from scripts.assets import ASSETS
+        self.assets = ASSETS
         
         #------------ Sprites
         
-        self.foreground = YSortCameraGroup(self)
-        self.background = YSortCameraGroup(self)
+        self.foreground = YSortCameraGroup()
+        self.background = YSortCameraGroup()
         
         self.characters = [
             NPC(Vector2(20, 20), [self.foreground], self, "dalmatian"),
@@ -132,8 +101,8 @@ class Game:
     
     def set_level(self, level_name: str):
         self.currentlevel = self.levels[level_name]
-        self.foreground = YSortCameraGroup(self)
-        self.background = YSortCameraGroup(self)
+        self.foreground = YSortCameraGroup()
+        self.background = YSortCameraGroup()
         
         #---- Adding Player and NPCs
         for entity in self.entities:
@@ -148,4 +117,4 @@ class Game:
                         self.background.add(sprite)
                     else:
                         self.foreground.add(sprite)
-Game(debug=True).run()
+Game().run()
