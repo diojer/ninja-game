@@ -40,6 +40,10 @@ class Level:
         self.player = Player(pos, [self.foreground], self, asset)
         self.add_character(self.player)
         return self.player
+    
+    def del_character(self, character: AnimatedBody):
+        self.characters.remove(character)
+        self.foreground.remove(character)
         
     def set_map(self, name):
         self.map = Tilemap(name)

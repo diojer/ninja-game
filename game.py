@@ -64,6 +64,8 @@ class Game:
             self.clock.tick(60) #60fps
     
     def set_level(self, level_name: str, player_loc: Vector2 = Vector2(0, 0), player_asset = "Ginger"):
+        if hasattr(self, "player"):
+            self.currentlevel.del_character(self.player)
         self.currentlevel = LEVELS[level_name]
         self.player = self.currentlevel.add_Player(player_loc, player_asset)
 Game().run()

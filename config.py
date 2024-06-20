@@ -1,7 +1,7 @@
 import pygame
 
 
-DEBUG = True
+DEBUG = False
 
 DISPLAY_SCALE = 5
 
