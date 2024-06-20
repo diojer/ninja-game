@@ -8,7 +8,7 @@ class Game:
     def __init__(self) -> None:
         pygame.init()
         self.screen = SCREEN
-        self.display = pygame.Surface((SCREEN_WIDTH//DISPLAY_SCALE, SCREEN_HEIGHT//DISPLAY_SCALE))
+        self.display = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT))
         self.clock = pygame.time.Clock()
         pygame.display.set_caption(GAME_CAPTION)
         
@@ -20,13 +20,13 @@ class Game:
         #------------ Levels
         
         self.levels = LEVELS
-        self.set_level("rocky_plains")
+        self.set_level("living_room_2")
         
 
 
     def run(self):
         while True:
-            self.display.fill((150, 220, 255))
+            self.display.fill((0, 0, 0))
             
             # draw background
             self.currentlevel.run(self.display)
@@ -63,9 +63,9 @@ class Game:
             pygame.display.update()
             self.clock.tick(60) #60fps
     
-    def set_level(self, level_name: str, player_loc: Vector2 = Vector2(0, 0), player_asset = "Ginger"):
+    def set_level(self, level_name: str):
         if hasattr(self, "player"):
             self.currentlevel.del_character(self.player)
         self.currentlevel = LEVELS[level_name]
-        self.player = self.currentlevel.add_Player(player_loc, player_asset)
+        self.player = self.currentlevel.add_Player()
 Game().run()

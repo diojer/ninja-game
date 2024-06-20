@@ -34,6 +34,6 @@ class Tile(pygame.sprite.Sprite):
         super().__init__(groups)
         self.image: Surface = image
         self.rect: Rect = Rect(pos, (size, size))
-        self.hitbox: Rect = self.rect.inflate(0, -4)
+        self.hitbox: Rect = self.rect.inflate(0, -6)
         self.hitbox.bottom = self.rect.bottom
         self.layer_name: str = layer_name

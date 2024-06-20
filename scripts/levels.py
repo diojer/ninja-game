@@ -8,7 +8,8 @@ class Level:
         
         self.set_map(name)
         self.characters: list[AnimatedBody] = []
-        
+        self.player_loc = Vector2(0, 0)
+        self.player_asset = "Ginger"
         
     def run(self, surf):
         self.update()
@@ -36,8 +37,8 @@ class Level:
             pos = data[asset]
             self.add_character(NPC(pos, [self.foreground], self, asset))
             
-    def add_Player(self, pos: Vector2, asset: str):
-        self.player = Player(pos, [self.foreground], self, asset)
+    def add_Player(self):
+        self.player = Player(self.player_loc, [self.foreground], self, self.player_asset)
         self.add_character(self.player)
         return self.player
     
@@ -63,7 +64,9 @@ class Level:
 
 LEVELS: dict[str, Level] = {
     "rocky_plains": Level("rocky_plains"),
-    "heart_level": Level("heart_level")
+    "heart_level": Level("heart_level"),
+    "living_room": Level("living_room"),
+    "living_room_2": Level("living_room_2")
 }
 
 LEVELS["rocky_plains"].add_NPCs({
@@ -71,3 +74,5 @@ LEVELS["rocky_plains"].add_NPCs({
     "knight": Vector2(35, 40),
     "wizard": Vector2(25, 60)
 })
+
+LEVELS["living_room_2"].player_loc = Vector2(0, 80)
