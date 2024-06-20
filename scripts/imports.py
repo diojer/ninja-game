@@ -6,3 +6,4 @@ from typing import TYPE_CHECKING
 from config import *
 if TYPE_CHECKING:
     from game import Game
+    from .levels import Level

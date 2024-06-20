@@ -1,5 +1,6 @@
 from .imports import *
 from .utils import dir_dict, dir_dict_trans
+from .assets import ASSETS
 
 import random
 
@@ -9,10 +10,10 @@ if TYPE_CHECKING:
             
 
 class KinematicBody(pygame.sprite.Sprite):
-    def __init__(self, pos, groups, game: "Game"):
+    def __init__(self, pos, groups, level: "Level"):
         super().__init__(groups)
         self.pos: Vector2 = pos
-        self.game: "Game" = game
+        self.level: "Level" = level
         self.movement = dir_dict.copy()
         self.colliding = dir_dict.copy()
         self.vel: Vector2 = Vector2(1, 1)
@@ -23,7 +24,7 @@ class KinematicBody(pygame.sprite.Sprite):
         
         # We increment x and y separately for collision detection reasons.        
         self.hitbox.x += self.dir().x * self.vel.x
-        for group in self.game.currentlevel.layers["collision"]:
+        for group in self.level.map.layers["collision"]:
             for sprite in group.sprites():
                 if self.hitbox.colliderect(sprite.hitbox):
                     if self.dir().x > 0:
@@ -34,7 +35,7 @@ class KinematicBody(pygame.sprite.Sprite):
                         self.hitbox.left = sprite.hitbox.right
         
         self.hitbox.y += self.dir().y * self.vel.y
-        for group in self.game.currentlevel.layers["collision"]:
+        for group in self.level.map.layers["collision"]:
             for sprite in group.sprites():
                 if self.hitbox.colliderect(sprite.hitbox):
                     if self.dir().y > 0:
@@ -44,7 +45,7 @@ class KinematicBody(pygame.sprite.Sprite):
                         self.colliding["up"] = True
                         self.hitbox.top = sprite.hitbox.bottom
         
-        self.rect.topleft = self.hitbox.topleft
+        self.rect.center = self.hitbox.center
 
     def dir(self):
         direction = Vector2((self.movement["right"] - self.movement["left"]), (self.movement["down"] - self.movement["up"]))
@@ -55,11 +56,11 @@ class KinematicBody(pygame.sprite.Sprite):
         self.colliding = dir_dict.copy()
 
 class AnimatedBody(KinematicBody):
-    def __init__(self, pos, groups, game: "Game", asset: str):
-        super().__init__(pos, groups, game)
+    def __init__(self, pos, groups, level: "Level", asset: str):
+        super().__init__(pos, groups, level)
         
         #----- Sprite set-up
-        self.assets = self.game.assets[asset]
+        self.assets = ASSETS[asset]
         
             #----- Idle asset should be a list of images not an animation
         self.image = self.assets["idle"][0]
@@ -156,17 +157,15 @@ class AnimatedBody(KinematicBody):
                 self.flip = False
 
 class Player(AnimatedBody):
-    def __init__(self, pos, groups, game: "Game", asset: str):
-        super().__init__(pos, groups, game, asset)
+    def __init__(self, pos, groups, level: "Level", asset: str):
+        super().__init__(pos, groups, level, asset)
+        self.vel = Vector2(1.5, 1.5)
+        self.hitbox = self.rect.inflate(-2, -8)
         self.prox = self.rect.inflate(20, 20) # self.prox will be a hitbox used to interact with objects/NPCs
         self.interactables: list[NPC | "Tile"] = []
-        self.interactables.extend(self.game.characters) # Adds all NPCs to things we can interact with
+        self.interactables.extend(self.level.characters) # Adds all NPCs to things we can interact with
         self.interaction: function | None = None
     
-    # Slight problem with the AnimatedBody class:
-        # We want the player's facing direction to be the direction they last moved.
-        # But we want to be able to set NPC's facing direction.
-        # Player class creates this distinction.
     def update(self):
         
         #---- Check if we are moving
@@ -186,14 +185,17 @@ class Player(AnimatedBody):
         
         super().update()
         
-        self.prox.center = self.hitbox.center
-        
+        self.rect.bottom = self.hitbox.bottom
+        self.prox.center = self.rect.center
+    
+    def draw(self, surf):
+        super().draw()
         if DEBUG:
-            pygame.draw.rect(self.game.display, "red", self.prox.move(-self.game.foreground.offset.x, -self.game.foreground.offset.y), 1)
+            pygame.draw.rect(surf, "red", self.prox.move(-self.level.foreground.offset.x, -self.level.foreground.offset.y), 1)
 
 class NPC(AnimatedBody):
-    def __init__(self, pos, groups, game: "Game", asset: str, aggressive: bool = False):
-        super().__init__(pos, groups, game, asset)
+    def __init__(self, pos, groups, level: "Level", asset: str, aggressive: bool = False):
+        super().__init__(pos, groups, level, asset)
         self.timer = pygame.time.Clock()
         self.aggressive = aggressive
         

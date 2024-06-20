@@ -15,14 +15,15 @@ class YSortCameraGroup(pygame.sprite.Group):
         for sprite in sorted(self.sprites(), key=lambda sprite: sprite.rect.centery):
             if hasattr(sprite, "flip"):
                 surf.blit(pygame.transform.flip(sprite.image, sprite.flip, False), sprite.rect.topleft - self.offset)
-                if DEBUG:
-                    pygame.draw.rect(surf, (15, 197, 247), sprite.rect.move(-self.offset.x, -self.offset.y), 1)
             else:
                 if hasattr(sprite, "layer_name"):
                     if "top" in sprite.layer_name:
                         top_layer.append(sprite)
                     else:
                         surf.blit(sprite.image, sprite.rect.topleft - self.offset)
+            if DEBUG:
+                pygame.draw.rect(surf, (15, 197, 247), sprite.rect.move(-self.offset.x, -self.offset.y), 1)
+                pygame.draw.rect(surf, (247, 197, 15), sprite.hitbox.move(-self.offset.x, -self.offset.y), 1)
         for tile in top_layer:
             surf.blit(tile.image, tile.rect.topleft - self.offset)
 
