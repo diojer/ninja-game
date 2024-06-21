@@ -12,13 +12,7 @@ class Game:
         self.clock = pygame.time.Clock()
         pygame.display.set_caption(GAME_CAPTION)
         
-        #------------ Assets
-        
-        
         self.assets = ASSETS
-        
-        #------------ Levels
-        
         self.levels = LEVELS
         self.set_level("living_room_2")
         

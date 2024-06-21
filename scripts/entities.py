@@ -54,6 +54,7 @@ class KinematicBody(pygame.sprite.Sprite):
 
     def reset_collisions(self):
         self.colliding = dir_dict.copy()
+        
 
 class AnimatedBody(KinematicBody):
     def __init__(self, pos, groups, level: "Level", asset: str):
@@ -208,6 +209,19 @@ class NPC(AnimatedBody):
         self.instructions: list[str] | None = None
         self.paused: bool = False # Paused will be set to true when we're interacting with NPCs.
 
+    def set_dir(self, dir: Vector2):
+        self.going = dir_dict.copy()
+        if dir.x:
+            if dir.x > 0:
+                self.going["right"] = True
+            elif dir.x < 0:
+                self.going["left"] = True
+        if dir.y:
+            if dir.y > 0:
+                self.going["down"] = True
+            if dir.y < 0:
+                self.going["up"] = True
+        self.facing = self.going.copy()
     
     def face_random(self):
         new_dir = random.randint(0, 3)

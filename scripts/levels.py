@@ -2,14 +2,15 @@ from .imports import *
 from .entities import AnimatedBody, NPC, Player
 from .camera import YSortCameraGroup
 from .tilemap import Tilemap
+from .utils import add_method
 
 class Level:
     def __init__(self, name: str):
         
         self.set_map(name)
-        self.characters: list[AnimatedBody] = []
+        self.characters: list[NPC] = []
         self.player_loc = Vector2(0, 0)
-        self.player_asset = "Ginger"
+        self.player_asset = "dalmatian"
         
     def run(self, surf):
         self.update()
@@ -18,6 +19,7 @@ class Level:
     def update(self):
         self.background.update(self.player)
         self.foreground.update(self.player)
+        self.commands(self)
         
     def render(self, surf):
         self.background.draw(surf)
@@ -39,7 +41,7 @@ class Level:
             
     def add_Player(self):
         self.player = Player(self.player_loc, [self.foreground], self, self.player_asset)
-        self.add_character(self.player)
+        # self.add_character(self.player)
         return self.player
     
     def del_character(self, character: AnimatedBody):
@@ -58,7 +60,9 @@ class Level:
                         self.background.add(sprite)
                     else:
                         self.foreground.add(sprite)
-                    
+    
+    def commands(self):
+        pass
 
 # ---- Level config
 
@@ -69,10 +73,22 @@ LEVELS: dict[str, Level] = {
     "living_room_2": Level("living_room_2")
 }
 
-LEVELS["rocky_plains"].add_NPCs({
-    "dalmatian": Vector2(20, 20),
-    "knight": Vector2(35, 40),
-    "wizard": Vector2(25, 60)
+LEVELS["living_room_2"].player_loc = Vector2(0, 80)
+
+LEVELS["living_room_2"].add_NPCs({
+    "Ginger": Vector2(80, 80)
 })
 
-LEVELS["living_room_2"].player_loc = Vector2(0, 80)
+def living_room_2(self: Level):
+    for character in self.characters:
+        pos = Vector2(character.rect.left, character.rect.top)
+        target = Vector2(self.player.rect.left, self.player.rect.top)
+        
+        direction = (target - pos)
+        direction.x = round(direction.x)
+        direction.y = round(direction.y)
+        if direction: direction = direction.normalize()
+        character.set_dir(direction)
+        
+
+setattr(LEVELS["living_room_2"], "commands", living_room_2)
