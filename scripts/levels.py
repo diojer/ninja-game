@@ -10,7 +10,7 @@ class Level:
         self.set_map(name)
         self.characters: list[NPC] = []
         self.player_loc = Vector2(0, 0)
-        self.player_asset = "dalmatian"
+        self.player_asset = "Ginger"
         
     def run(self, surf):
         self.update()
@@ -61,7 +61,7 @@ class Level:
                     else:
                         self.foreground.add(sprite)
     
-    def commands(self):
+    def commands(self, etc):
         pass
 
 # ---- Level config
@@ -70,8 +70,11 @@ LEVELS: dict[str, Level] = {
     "rocky_plains": Level("rocky_plains"),
     "heart_level": Level("heart_level"),
     "living_room": Level("living_room"),
-    "living_room_2": Level("living_room_2")
+    "living_room_2": Level("living_room_2"),
+    "bath_room": Level("bathroom")
 }
+
+LEVELS["bath_room"].player_loc = Vector2(16, 80)
 
 LEVELS["living_room_2"].player_loc = Vector2(0, 80)
 
