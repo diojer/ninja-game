@@ -14,7 +14,7 @@ class Game:
         
         self.assets = ASSETS
         self.levels = LEVELS
-        self.set_level("living_room")
+        self.set_level("bath_room")
         
 
 

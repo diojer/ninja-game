@@ -77,8 +77,11 @@ LEVELS: dict[str, Level] = {
     "rocky_plains": Level("rocky_plains"),
     "heart_level": Level("heart_level"),
     "living_room": Level("living_room"),
-    "living_room_2": Level("living_room_2")
+    "living_room_2": Level("living_room_2"),
+    "bath_room": Level("bathroom")
 }
+
+LEVELS["bath_room"].player_loc = Vector2(16, 80)
 
 LEVELS["living_room_2"].player_loc = Vector2(0, 80)
 LEVELS["living_room"].player_loc = Vector2(0, 80)
