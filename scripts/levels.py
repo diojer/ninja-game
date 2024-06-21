@@ -2,15 +2,14 @@ from .imports import *
 from .entities import AnimatedBody, NPC, Player
 from .camera import YSortCameraGroup
 from .tilemap import Tilemap
-from .utils import add_method
 
 class Level:
     def __init__(self, name: str):
         
         self.set_map(name)
         self.characters: list[NPC] = []
-        self.player_loc = Vector2(0, 0)
-        self.player_asset = "dalmatian"
+        self.player_loc = None
+        self.player_asset = None
         
     def run(self, surf):
         self.update()
@@ -39,8 +38,16 @@ class Level:
             pos = data[asset]
             self.add_character(NPC(pos, [self.foreground], self, asset))
             
-    def add_Player(self):
-        self.player = Player(self.player_loc, [self.foreground], self, self.player_asset)
+    def add_Player(self, loc = None, asset = None):
+        kwargs = {
+            "groups": [self.foreground],
+            "level": self,
+        }
+        if self.player_loc: kwargs["pos"] = self.player_loc
+        if self.player_asset: kwargs["asset"] = self.player_asset
+        
+        self.player = Player(**kwargs)
+        
         # self.add_character(self.player)
         return self.player
     
@@ -61,7 +68,7 @@ class Level:
                     else:
                         self.foreground.add(sprite)
     
-    def commands(self):
+    def commands(self, etc):
         pass
 
 # ---- Level config
@@ -74,6 +81,7 @@ LEVELS: dict[str, Level] = {
 }
 
 LEVELS["living_room_2"].player_loc = Vector2(0, 80)
+LEVELS["living_room"].player_loc = Vector2(0, 80)
 
 LEVELS["living_room_2"].add_NPCs({
     "Ginger": Vector2(80, 80)

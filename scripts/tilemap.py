@@ -15,10 +15,20 @@ class Tilemap:
             "decorations": [],
             "top": []
         }
+        self.colliders = {}
+        for gid, colliders in self.tmx.get_tile_colliders():
+            for collider in colliders:
+                self.colliders[gid] = collider
+        
         for layer in self.tmx.layers:
             group = pygame.sprite.Group()
-            for x, y, tile in layer.tiles():
-                sprite = Tile(group, tile, (x * self.tile_size, y * self.tile_size), layer.name.lower())
+            i = self.tmx.layers.index(layer)
+            for x, y, img in layer.tiles():
+                gid = self.tmx.get_tile_gid(x, y, i)
+                if gid in self.colliders:
+                    sprite = Tile(group, img, (x * self.tile_size, y * self.tile_size), layer.name.lower(), self.colliders[gid])
+                else:
+                    sprite = Tile(group, img, (x * self.tile_size, y * self.tile_size), layer.name.lower())
             for type in self.layers:
                 if type in layer.name.lower():
                     self.layers[type].append(group)
@@ -30,10 +40,13 @@ class Tilemap:
                 layer.draw_tile(surf, offset)
                 
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, groups, image: Surface, pos, layer_name: str, size: int = TILE_SIZE):
+    def __init__(self, groups, image: Surface, pos, layer_name: str, collider = None, size: int = TILE_SIZE):
         super().__init__(groups)
         self.image: Surface = image
         self.rect: Rect = Rect(pos, (size, size))
-        self.hitbox: Rect = self.rect.inflate(0, -6)
-        self.hitbox.bottom = self.rect.bottom
         self.layer_name: str = layer_name
+        
+        if collider:
+            self.hitbox: Rect = Rect(collider.x, collider.y, collider.width, collider.height).move(self.rect.x, self.rect.y)
+            # self.hitbox.bottom = self.rect.bottom
+        

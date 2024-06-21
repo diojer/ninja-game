@@ -23,7 +23,8 @@ class YSortCameraGroup(pygame.sprite.Group):
                         surf.blit(sprite.image, sprite.rect.topleft - self.offset)
             if DEBUG:
                 pygame.draw.rect(surf, (15, 197, 247), sprite.rect.move(-self.offset.x, -self.offset.y), 1)
-                pygame.draw.rect(surf, (247, 197, 15), sprite.hitbox.move(-self.offset.x, -self.offset.y), 1)
+                if hasattr(sprite, "hitbox"):
+                    pygame.draw.rect(surf, (247, 197, 15), sprite.hitbox.move(-self.offset.x, -self.offset.y), 1)
         for tile in top_layer:
             surf.blit(tile.image, tile.rect.topleft - self.offset)
 

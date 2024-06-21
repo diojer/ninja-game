@@ -26,24 +26,26 @@ class KinematicBody(pygame.sprite.Sprite):
         self.hitbox.x += self.dir().x * self.vel.x
         for group in self.level.map.layers["collision"]:
             for sprite in group.sprites():
-                if self.hitbox.colliderect(sprite.hitbox):
-                    if self.dir().x > 0:
-                        self.colliding["right"] = True
-                        self.hitbox.right = sprite.hitbox.left
-                    if self.dir().x <= 0:
-                        self.colliding["left"] = True
-                        self.hitbox.left = sprite.hitbox.right
+                if hasattr(sprite, "hitbox"):
+                    if self.hitbox.colliderect(sprite.hitbox):
+                        if self.dir().x > 0:
+                            self.colliding["right"] = True
+                            self.hitbox.right = sprite.hitbox.left
+                        if self.dir().x <= 0:
+                            self.colliding["left"] = True
+                            self.hitbox.left = sprite.hitbox.right
         
         self.hitbox.y += self.dir().y * self.vel.y
         for group in self.level.map.layers["collision"]:
             for sprite in group.sprites():
-                if self.hitbox.colliderect(sprite.hitbox):
-                    if self.dir().y > 0:
-                        self.colliding["down"] = True
-                        self.hitbox.bottom = sprite.hitbox.top
-                    if self.dir().y <= 0:
-                        self.colliding["up"] = True
-                        self.hitbox.top = sprite.hitbox.bottom
+                if hasattr(sprite, "hitbox"):
+                    if self.hitbox.colliderect(sprite.hitbox):
+                        if self.dir().y > 0:
+                            self.colliding["down"] = True
+                            self.hitbox.bottom = sprite.hitbox.top
+                        if self.dir().y <= 0:
+                            self.colliding["up"] = True
+                            self.hitbox.top = sprite.hitbox.bottom
         
         self.rect.center = self.hitbox.center
 
@@ -158,10 +160,10 @@ class AnimatedBody(KinematicBody):
                 self.flip = False
 
 class Player(AnimatedBody):
-    def __init__(self, pos, groups, level: "Level", asset: str):
+    def __init__(self, groups, level: "Level", asset: str = "Ginger", pos: Vector2 = Vector2(0, 0)):
         super().__init__(pos, groups, level, asset)
         self.vel = Vector2(1.5, 1.5)
-        self.hitbox = self.rect.inflate(-2, -8)
+        self.hitbox = self.rect.inflate(-2, -10)
         self.prox = self.rect.inflate(20, 20) # self.prox will be a hitbox used to interact with objects/NPCs
         self.interactables: list[NPC | "Tile"] = []
         self.interactables.extend(self.level.characters) # Adds all NPCs to things we can interact with
