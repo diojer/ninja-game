@@ -160,7 +160,7 @@ class AnimatedBody(KinematicBody):
                 self.flip = False
 
 class Player(AnimatedBody):
-    def __init__(self, groups, level: "Level", asset: str = "Ginger", pos: Vector2 = Vector2(0, 0)):
+    def __init__(self, groups, level: "Level", asset: str = "mother", pos: Vector2 = Vector2(0, 0)):
         super().__init__(pos, groups, level, asset)
         self.vel = Vector2(1.5, 1.5)
         self.hitbox = self.rect.inflate(-2, -10)
