@@ -7,7 +7,7 @@ class Level:
     def __init__(self, name: str):
         
         self.set_map(name)
-        self.characters: list[NPC] = []
+        self.characters: dict[str, NPC] = {}
         self.player_loc = None
         self.player_asset = None
         
@@ -24,21 +24,21 @@ class Level:
         self.background.draw(surf)
         self.foreground.draw(surf)
         
-    def add_character(self, character: AnimatedBody):
-        self.characters.append(character)
+    def add_character(self, entity: NPC):
+        self.characters[entity.name] = entity
     
-    def add_characters(self, characters: list[AnimatedBody]):
-        self.characters.extend(characters)
+    def add_characters(self, characters: list[NPC]):
+        for character in characters:
+            self.add_character(character.name, character)
     
-    def add_NPC(self, pos: Vector2, asset: str):
-        self.add_character(NPC(pos, [self.foreground], self, asset))
+    def add_NPC(self, name: str, pos: Vector2, asset: str):
+        self.add_character(NPC(pos, [self.foreground], self, name, asset))
         
-    def add_NPCs(self, data: dict[str, Vector2]):
-        for asset in data:
-            pos = data[asset]
-            self.add_character(NPC(pos, [self.foreground], self, asset))
+    def add_NPCs(self, npcs: list[dict[str, str | Vector2]]):
+        for npc in npcs:
+            self.add_NPC(npc["name"], npc["pos"], npc["asset"])
             
-    def add_Player(self, loc = None, asset = None):
+    def add_Player(self):
         kwargs = {
             "groups": [self.foreground],
             "level": self,
@@ -48,12 +48,12 @@ class Level:
         
         self.player = Player(**kwargs)
         
-        # self.add_character(self.player)
         return self.player
     
-    def del_character(self, character: AnimatedBody):
-        self.characters.remove(character)
-        self.foreground.remove(character)
+    def del_character(self, name: str):
+        self.foreground.remove(self.characters[name])
+        del self.characters[name]
+        
         
     def set_map(self, name):
         self.map = Tilemap(name)
@@ -73,33 +73,8 @@ class Level:
 
 # ---- Level config
 
-LEVELS: dict[str, Level] = {
-    "rocky_plains": Level("rocky_plains"),
-    "heart_level": Level("heart_level"),
-    "living_room": Level("living_room"),
-    "living_room_2": Level("living_room_2"),
-    "bath_room": Level("bathroom")
-}
+LEVELS: dict[str, Level] = {}
 
-LEVELS["bath_room"].player_loc = Vector2(16, 80)
-
-LEVELS["living_room_2"].player_loc = Vector2(0, 80)
-LEVELS["living_room"].player_loc = Vector2(0, 80)
-
-LEVELS["living_room_2"].add_NPCs({
-    "Ginger": Vector2(80, 80)
-})
-
-def living_room_2(self: Level):
-    for character in self.characters:
-        pos = Vector2(character.rect.left, character.rect.top)
-        target = Vector2(self.player.rect.left, self.player.rect.top)
-        
-        direction = (target - pos)
-        direction.x = round(direction.x)
-        direction.y = round(direction.y)
-        if direction: direction = direction.normalize()
-        character.set_dir(direction)
-        
-
-setattr(LEVELS["living_room_2"], "commands", living_room_2)
+from .rooms.living_room import *
+from .rooms.living_room_2 import *
+from .rooms.bath_room import *

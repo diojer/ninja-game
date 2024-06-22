@@ -130,13 +130,12 @@ class AnimatedBody(KinematicBody):
             self.set_action("idle")
             
             # If we are idle:
+            if self.facing["left"] or self.facing["right"]:
+                self.image = self.assets["idle"][2]
             if self.facing["up"]:
                 self.image = self.assets["idle"][1]
             if self.facing["down"]:
                 self.image = self.assets["idle"][0]
-            if self.facing["left"] or self.facing["right"]:
-                self.image = self.assets["idle"][2]
-            
             # down  = 0
             # up    = 1
             # left  = 2
@@ -160,13 +159,13 @@ class AnimatedBody(KinematicBody):
                 self.flip = False
 
 class Player(AnimatedBody):
-    def __init__(self, groups, level: "Level", asset: str = "mother", pos: Vector2 = Vector2(0, 0)):
+    def __init__(self, groups, level: "Level", asset: str = "Ginger", pos: Vector2 = Vector2(0, 0)):
         super().__init__(pos, groups, level, asset)
         self.vel = Vector2(1.5, 1.5)
         self.hitbox = self.rect.inflate(-2, -10)
         self.prox = self.rect.inflate(20, 20) # self.prox will be a hitbox used to interact with objects/NPCs
         self.interactables: list[NPC | "Tile"] = []
-        self.interactables.extend(self.level.characters) # Adds all NPCs to things we can interact with
+        self.interactables.extend(self.level.characters.values()) # Adds all NPCs to things we can interact with
         self.interaction: function | None = None
     
     def update(self):
@@ -179,9 +178,10 @@ class Player(AnimatedBody):
         
         found_interaction = False
         for interactable in self.interactables:
-            if self.prox.colliderect(interactable.hitbox):
-                self.interaction = interactable.interaction
-                found_interaction = True
+            if hasattr(interactable, "hitbox"):
+                if self.prox.colliderect(interactable.hitbox):
+                    self.interaction = interactable.interaction
+                    found_interaction = True
         
         if not found_interaction:
             self.interaction = None
@@ -197,8 +197,9 @@ class Player(AnimatedBody):
             pygame.draw.rect(surf, "red", self.prox.move(-self.level.foreground.offset.x, -self.level.foreground.offset.y), 1)
 
 class NPC(AnimatedBody):
-    def __init__(self, pos, groups, level: "Level", asset: str, aggressive: bool = False):
+    def __init__(self, pos, groups, level: "Level", name: str, asset: str, aggressive: bool = False):
         super().__init__(pos, groups, level, asset)
+        self.name = name
         self.timer = pygame.time.Clock()
         self.aggressive = aggressive
         
@@ -211,19 +212,22 @@ class NPC(AnimatedBody):
         self.instructions: list[str] | None = None
         self.paused: bool = False # Paused will be set to true when we're interacting with NPCs.
 
-    def set_dir(self, dir: Vector2):
+    def stop(self):
         self.going = dir_dict.copy()
+
+    def set_dir(self, dir: Vector2):
+        self.facing = dir_dict.copy()
         if dir.x:
             if dir.x > 0:
-                self.going["right"] = True
+                self.facing["right"] = True
             elif dir.x < 0:
-                self.going["left"] = True
+                self.facing["left"] = True
         if dir.y:
             if dir.y > 0:
-                self.going["down"] = True
+                self.facing["down"] = True
             if dir.y < 0:
-                self.going["up"] = True
-        self.facing = self.going.copy()
+                self.facing["up"] = True
+        self.going = self.facing.copy()
     
     def face_random(self):
         new_dir = random.randint(0, 3)
