@@ -20,3 +20,9 @@ TILE_SIZE = 16
 # EVENTS
 
 LVL_EVENT = pygame.event.custom_type()
+
+
+PAUSED_EVENTS = [
+    pygame.KEYDOWN,
+    LVL_EVENT
+]

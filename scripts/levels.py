@@ -30,6 +30,22 @@ class Level:
         self.background.draw(surf)
         self.foreground.draw(surf)
         
+        if DEBUG:
+            dbg_color: str | tuple
+            for sprite in self.foreground.sprites():
+                dbg_color = (15, 197, 247)
+                pygame.draw.rect(surf, dbg_color, sprite.rect.move(-self.foreground.offset.x, -self.foreground.offset.y), 1)
+                if hasattr(sprite, "hitbox"):
+                    dbg_color = (247, 197, 15)
+                    pygame.draw.rect(surf, dbg_color, sprite.hitbox.move(-self.foreground.offset.x, -self.foreground.offset.y), 1)
+            
+            for obj in self.obj_group:
+                if "door" in obj.name:
+                    dbg_color = "purple"
+                elif "player" in obj.name:
+                    dbg_color = "red"
+                pygame.draw.rect(surf, dbg_color, obj.rect.move(-self.foreground.offset.x, -self.foreground.offset.y), 1)
+        
     def add_character(self, entity: NPC):
         self.characters[entity.name] = entity
     
@@ -44,7 +60,7 @@ class Level:
         for npc in npcs:
             self.add_NPC(npc["name"], npc["pos"], npc["asset"])
             
-    def add_Player(self, lastdoor: str = None):
+    def add_Player(self, flipped: bool = False, lastdoor: str = None):
         kwargs = {
             "groups": [self.foreground],
             "level": self,
@@ -66,6 +82,7 @@ class Level:
             if self.player_loc: kwargs["pos"] = self.player_loc
         
         self.player = Player(**kwargs)
+        self.player.flip = flipped
         
         return self.player
     
@@ -80,6 +97,7 @@ class Level:
         self.map = Tilemap(name)
         self.foreground = YSortCameraGroup()
         self.background = YSortCameraGroup()
+        self.obj_group = []
         
         for type in self.map.layers:
             for group in self.map.layers[type]:
@@ -88,6 +106,8 @@ class Level:
                         self.background.add(sprite)
                     elif not type == "spawns" and not type == "doors":
                         self.foreground.add(sprite)
+                    else:
+                        self.obj_group.append(sprite)
 
 # ---- Level config
 
@@ -95,4 +115,5 @@ LEVELS: dict[str, Level] = {}
 
 from .rooms.living_room import *
 from .rooms.living_room_2 import *
+from .rooms.living_room_3 import *
 from .rooms.bath_room import *

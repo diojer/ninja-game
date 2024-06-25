@@ -3,6 +3,7 @@ from scripts.imports import *
 
 from scripts.levels import LEVELS
 from scripts.assets import ASSETS
+from scripts.utils import dir_dict
 
 class Game:
     def __init__(self) -> None:
@@ -16,11 +17,22 @@ class Game:
         self.levels = LEVELS
         self.set_level("living_room_2")
         
+        self.next_lvl = None
+        self.fading_opc = 255
 
 
     def run(self):
         while True:
+            self.screen.fill((0, 0, 0))
             self.display.fill((0, 0, 0))
+            
+            if self.next_lvl:
+                faded = self.fade_out()
+                self.player.going = dir_dict.copy()
+                pygame.event.set_blocked(PAUSED_EVENTS)
+                if faded:
+                    self.set_level(self.next_lvl)
+                    self.reset_fade()
             
             # draw background
             self.currentlevel.run(self.display)
@@ -52,7 +64,7 @@ class Game:
                     if event.key == pygame.K_d:
                         self.player.going["right"] = False
                 if event.type == LVL_EVENT:
-                    self.set_level(event.name)
+                    self.next_lvl = event.name
             
             self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
             pygame.display.update()
@@ -63,6 +75,39 @@ class Game:
         if hasattr(self, "player"):
             self.currentlevel.del_player()
             kwargs["lastdoor"] = self.player.lastdoor
+            kwargs["flipped"] = self.player.flip
         self.currentlevel = LEVELS[level_name]
         self.player = self.currentlevel.add_Player(**kwargs)
+        
+        
+    def fade(self, length, out: bool = True, color = "black"):
+        fade_tmr = pygame.time.Clock()
+        fading_time = 0
+        rect = Rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT)
+        color = pygame.Color(0, 0, 0, 0)
+        
+        opacity: int
+        opacity = 128
+        while fading_time < length:
+            color = pygame.Color(0, 0, 0, opacity)
+            pygame.draw.rect(self.display, color, rect)
+            self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
+            pygame.display.update()
+            self.clock.tick(60) #60fps
+            # opacity = (opacity + 1) % 255
+            fading_time += fade_tmr.tick()
+    
+    def fade_out(self):
+        self.display.set_alpha(self.fading_opc)
+        self.fading_opc -= 10
+        if self.fading_opc < 0:
+            return True
+        return False
+
+    def reset_fade(self):
+        self.display.set_alpha(255)
+        pygame.event.set_allowed(PAUSED_EVENTS)
+        self.next_lvl = None
+        self.fading_opc = 255
+            
 Game().run()

@@ -6,8 +6,8 @@ def commands(self: Level):
             if "door" in obj.name:
                 match obj.name:
                     case "w_door":
-                        pygame.event.post(pygame.event.Event(LVL_EVENT, dict(name="living_room_2")))
+                        pygame.event.post(pygame.event.Event(LVL_EVENT, dict(name="living_room")))
                     case "e_door":
-                        pygame.event.post(pygame.event.Event(LVL_EVENT, dict(name="living_room_3")))
+                        pygame.event.post(pygame.event.Event(LVL_EVENT, dict(name="bath_room")))
 
-LEVELS["living_room"] = Level("living_room", commands)
+LEVELS["living_room_3"] = Level("living_room_3", commands)

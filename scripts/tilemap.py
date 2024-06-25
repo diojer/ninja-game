@@ -15,9 +15,6 @@ class Tilemap:
             # Anything with collision will collide with the player
             "collision": [],
             
-            # This is a WIP
-            "breakable": [],
-            
             # This will not collide with the player but will be drawn as a Y-sorted sprite
             "decorations": [],
             
@@ -57,7 +54,7 @@ class Tilemap:
             group = pygame.sprite.Group()
             layer = self.tmx.layers[i]
             for obj in layer:
-                sprite = Tile(group, obj.image, (obj.x, obj.y), layer.name.lower(), obj=obj)
+                sprite = Obj(group, obj, (obj.x, obj.y), layer.name.lower(), size=(obj.width, obj.height))
             for type in self.layers:
                 if type in layer.name.lower():
                     self.layers[type].append(group)
@@ -82,3 +79,12 @@ class Tile(pygame.sprite.Sprite):
         if obj:
             self.obj = obj
             self.name = obj.name
+
+class Obj(pygame.sprite.Sprite):
+    def __init__(self, groups, obj, pos, layer_name: str, size: tuple = (TILE_SIZE, TILE_SIZE)):
+        super().__init__(groups)
+        self.obj = obj
+        self.rect: Rect = Rect(pos, size)
+        self.pos = self.rect.topleft
+        self.layer_name: str = layer_name
+        self.name = obj.name

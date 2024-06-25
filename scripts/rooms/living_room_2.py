@@ -4,6 +4,7 @@ from .imports import *
 def commands(self: Level):
     
     kid = level_characters["kid"]
+    kid.vel = Vector2(1.2, 1.2)
     
     pos = Vector2(kid.rect.left, kid.rect.top)
     target = Vector2(self.player.rect.left, self.player.rect.top)
@@ -28,6 +29,7 @@ def commands(self: Level):
                 match obj.name:
                     case "e_door":
                         pygame.event.post(pygame.event.Event(LVL_EVENT, dict(name="living_room")))
+                    
         
 
 LEVELS["living_room_2"] = Level("living_room_2", commands)
