@@ -1,5 +1,6 @@
 from .imports import *
 
-LEVELS["bath_room"] = Level("bathroom")
+def commands(self: Level):
+    pass
 
-LEVELS["bath_room"].player_loc = Vector2(16, 80)
+LEVELS["bath_room"] = Level("bathroom", commands)

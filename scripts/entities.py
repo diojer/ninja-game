@@ -16,9 +16,11 @@ class KinematicBody(pygame.sprite.Sprite):
         self.level: "Level" = level
         self.movement = dir_dict.copy()
         self.colliding = dir_dict.copy()
+        self.interacting = []
         self.vel: Vector2 = Vector2(1, 1)
         self.rect: FRect
         self.hitbox: FRect
+        self.lastdoor: str
 
     def update(self):
         
@@ -47,6 +49,16 @@ class KinematicBody(pygame.sprite.Sprite):
                             self.colliding["up"] = True
                             self.hitbox.top = sprite.hitbox.bottom
         
+        for group in self.level.map.layers["doors"]:
+            for sprite in group.sprites():
+                if self.hitbox.colliderect(sprite.rect):
+                    if not sprite in self.interacting:
+                        self.interacting.append(sprite)
+                        self.lastdoor = sprite.name
+                else:
+                    if sprite in self.interacting:
+                        self.interacting.remove(sprite)
+        
         self.rect.center = self.hitbox.center
 
     def dir(self):
@@ -56,7 +68,6 @@ class KinematicBody(pygame.sprite.Sprite):
 
     def reset_collisions(self):
         self.colliding = dir_dict.copy()
-        
 
 class AnimatedBody(KinematicBody):
     def __init__(self, pos, groups, level: "Level", asset: str):
@@ -159,7 +170,7 @@ class AnimatedBody(KinematicBody):
                 self.flip = False
 
 class Player(AnimatedBody):
-    def __init__(self, groups, level: "Level", asset: str = "Ginger", pos: Vector2 = Vector2(0, 0)):
+    def __init__(self, groups, level: "Level", asset: str = "Ginger", pos: Vector2 = Vector2(0, 0), lastdoor: str = None):
         super().__init__(pos, groups, level, asset)
         self.vel = Vector2(1.5, 1.5)
         self.hitbox = self.rect.inflate(-2, -10)
@@ -167,6 +178,7 @@ class Player(AnimatedBody):
         self.interactables: list[NPC | "Tile"] = []
         self.interactables.extend(self.level.characters.values()) # Adds all NPCs to things we can interact with
         self.interaction: function | None = None
+        self.lastdoor = lastdoor
     
     def update(self):
         
@@ -389,4 +401,3 @@ class NPC(AnimatedBody):
 
     def interaction(self):
         pass
-        

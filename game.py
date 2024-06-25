@@ -25,7 +25,6 @@ class Game:
             # draw background
             self.currentlevel.run(self.display)
             
-            
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -52,14 +51,18 @@ class Game:
                         self.player.going["down"] = False
                     if event.key == pygame.K_d:
                         self.player.going["right"] = False
+                if event.type == LVL_EVENT:
+                    self.set_level(event.name)
             
             self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
             pygame.display.update()
             self.clock.tick(60) #60fps
     
     def set_level(self, level_name: str):
+        kwargs = {}
         if hasattr(self, "player"):
-            self.currentlevel.del_character(self.player)
+            self.currentlevel.del_player()
+            kwargs["lastdoor"] = self.player.lastdoor
         self.currentlevel = LEVELS[level_name]
-        self.player = self.currentlevel.add_Player()
+        self.player = self.currentlevel.add_Player(**kwargs)
 Game().run()

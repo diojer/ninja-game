@@ -8,27 +8,56 @@ class Tilemap:
         self.level: str = level
         self.tile_size = tile_size
         self.tmx = load_pygame(f"data/tilemaps/{self.level}.tmx")
-        self.layers: dict[str, list[pygame.sprite.Group]] = {
+        self.layers: dict[str, list[pygame.sprite.Group] | pygame.sprite.Group] = {
+            # Anything with floor is always drawn under the player
             "floor": [],
+            
+            # Anything with collision will collide with the player
             "collision": [],
+            
+            # This is a WIP
             "breakable": [],
+            
+            # This will not collide with the player but will be drawn as a Y-sorted sprite
             "decorations": [],
+            
+            # This is an object group which contains all spawn points
+            "spawns": [],
+            
+            # This is an object group which contains all doors
+            "doors": [],
+            
+            # Anything with top is always drawn over the player.
             "top": []
         }
         self.colliders = {}
         for gid, colliders in self.tmx.get_tile_colliders():
             for collider in colliders:
+                
+                # This works because we are only using one collider per tile.
                 self.colliders[gid] = collider
-        
-        for layer in self.tmx.layers:
+        tile_layers = list(self.tmx.visible_tile_layers)
+        obj_layers = list(self.tmx.visible_object_groups)
+
+        for i in tile_layers:
             group = pygame.sprite.Group()
-            i = self.tmx.layers.index(layer)
+            layer = self.tmx.layers[i]
             for x, y, img in layer.tiles():
                 gid = self.tmx.get_tile_gid(x, y, i)
                 if gid in self.colliders:
                     sprite = Tile(group, img, (x * self.tile_size, y * self.tile_size), layer.name.lower(), self.colliders[gid])
                 else:
                     sprite = Tile(group, img, (x * self.tile_size, y * self.tile_size), layer.name.lower())
+            for type in self.layers:
+                if type in layer.name.lower():
+                    self.layers[type].append(group)
+                    break
+        
+        for i in obj_layers:
+            group = pygame.sprite.Group()
+            layer = self.tmx.layers[i]
+            for obj in layer:
+                sprite = Tile(group, obj.image, (obj.x, obj.y), layer.name.lower(), obj=obj)
             for type in self.layers:
                 if type in layer.name.lower():
                     self.layers[type].append(group)
@@ -40,13 +69,16 @@ class Tilemap:
                 layer.draw_tile(surf, offset)
                 
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, groups, image: Surface, pos, layer_name: str, collider = None, size: int = TILE_SIZE):
+    def __init__(self, groups, image: Surface, pos, layer_name: str, collider = None, obj = None, size: int = TILE_SIZE):
         super().__init__(groups)
         self.image: Surface = image
         self.rect: Rect = Rect(pos, (size, size))
+        self.pos = self.rect.topleft
         self.layer_name: str = layer_name
-        
+                
         if collider:
             self.hitbox: Rect = Rect(collider.x, collider.y, collider.width, collider.height).move(self.rect.x, self.rect.y)
-            # self.hitbox.bottom = self.rect.bottom
         
+        if obj:
+            self.obj = obj
+            self.name = obj.name

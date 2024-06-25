@@ -16,3 +16,7 @@ DISPLAY_HEIGHT = SCREEN_HEIGHT // DISPLAY_SCALE
 GAME_CAPTION = "Dog Detective"
 
 TILE_SIZE = 16
+
+# EVENTS
+
+LVL_EVENT = pygame.event.custom_type()

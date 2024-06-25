@@ -1,15 +1,5 @@
 from .imports import *
 
-LEVELS["living_room_2"] = Level("living_room_2")
-
-LEVELS["living_room_2"].add_NPCs([
-    dict(name="kid", pos=Vector2(90, 90), asset="Ginger")
-])
-
-LEVELS["living_room_2"].player_loc = Vector2(0, 80)
-
-level_characters = LEVELS["living_room_2"].characters
-
 
 def commands(self: Level):
     
@@ -31,5 +21,21 @@ def commands(self: Level):
     else:
         kid.stop()
         
+    
+    if self.player.interacting:
+        for obj in self.player.interacting:
+            if "door" in obj.name:
+                match obj.name:
+                    case "e_door":
+                        pygame.event.post(pygame.event.Event(LVL_EVENT, dict(name="living_room")))
+        
 
-setattr(LEVELS["living_room_2"], "commands", commands)
+LEVELS["living_room_2"] = Level("living_room_2", commands)
+
+LEVELS["living_room_2"].add_NPCs([
+    dict(name="kid", pos=Vector2(90, 90), asset="Ginger")
+])
+
+LEVELS["living_room_2"].player_loc = Vector2(0, 80)
+
+level_characters = LEVELS["living_room_2"].characters
