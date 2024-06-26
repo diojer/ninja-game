@@ -4,7 +4,7 @@ from .imports import *
 def commands(self: Level):
     
     kid = level_characters["kid"]
-    kid.vel = Vector2(1.2, 1.2)
+    kid.vel = Vector2(1.3, 1.3)
     
     pos = Vector2(kid.rect.left, kid.rect.top)
     target = Vector2(self.player.rect.left, self.player.rect.top)

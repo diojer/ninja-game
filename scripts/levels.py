@@ -116,4 +116,5 @@ LEVELS: dict[str, Level] = {}
 from .rooms.living_room import *
 from .rooms.living_room_2 import *
 from .rooms.living_room_3 import *
+from .rooms.living_room_4 import *
 from .rooms.bath_room import *

@@ -15,7 +15,7 @@ class Game:
         
         self.assets = ASSETS
         self.levels = LEVELS
-        self.set_level("living_room_2")
+        self.set_level("living_room_3")
         
         self.next_lvl = None
         self.fading_opc = 255

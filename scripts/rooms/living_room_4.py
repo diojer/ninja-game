@@ -11,6 +11,6 @@ def commands(self: Level):
                         pygame.event.post(pygame.event.Event(LVL_EVENT, dict(name="bath_room")))
 
 
-LEVELS["living_room_3"] = Level("living_room_3", commands)
+LEVELS["living_room_4"] = Level("living_room_4", commands)
 
-LEVELS["living_room_3"].player_loc = Vector2(0, 120)
+LEVELS["living_room_4"].player_loc = Vector2(0, 80)
