@@ -34,7 +34,6 @@ class Game:
                     self.set_level(self.next_lvl)
                     self.reset_fade()
             
-            # draw background
             self.currentlevel.run(self.display)
             
             for event in pygame.event.get():

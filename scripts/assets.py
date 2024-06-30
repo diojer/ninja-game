@@ -32,7 +32,7 @@ ASSETS: dict[str, dict[str, Animation | list[pygame.Surface]]] = {
         "walk_u": Animation(get_spritesheet_images((16, 20), load_image("wizard/walk_u.png")), 5),
         "walk_s": Animation(get_spritesheet_images((16, 20), load_image("wizard/walk_s.png")), 5)
     },
-        "mother": {
+    "mother": {
         "idle": get_spritesheet_images((32, 32), load_image("mother/idle.png")),
         "walk_d": Animation(get_spritesheet_images((32, 32), load_image("mother/walk_d.png")), 8),
         "walk_u": Animation(get_spritesheet_images((32, 32), load_image("mother/walk_u.png")), 8),

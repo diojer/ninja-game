@@ -3,12 +3,16 @@ from .entities import AnimatedBody, NPC, Player
 from .camera import YSortCameraGroup
 from .tilemap import Tilemap
 
+def empty_func(arg):
+    pass
+
 class Level:
-    def __init__(self, name: str, commands: Callable):
+    def __init__(self, name: str, commands: Callable, loader: Callable = empty_func):
         
         self.set_map(name)
         self.characters: dict[str, NPC] = {}
         self.commands = commands
+        self.loader = loader
         self.player_loc = None
         self.player_asset = None
         
@@ -16,6 +20,8 @@ class Level:
         for spawn_group in self.map.layers["spawns"]:
             for spawn in spawn_group.sprites():
                 self.spawns[spawn.name] = spawn
+        
+        self.loader(self)
         
     def run(self, surf):
         self.update()

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="18" height="12" tilewidth="16" tileheight="16" infinite="0" nextlayerid="12" nextobjectid="9">
  <tileset firstgid="1" source="../tilesets/TilesetLivingroom.tsx"/>
+ <tileset firstgid="71" source="../tilesets/livingroom_blue.tsx"/>
  <layer id="1" name="floor" width="18" height="12">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -56,7 +57,7 @@
 52,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,52,
 52,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,52,
 52,0,15,16,17,18,0,0,0,0,0,15,16,17,18,0,0,52,
-52,0,25,26,27,28,42,0,0,0,56,25,26,27,28,0,0,52,
+52,0,25,26,27,28,42,0,0,0,97,25,26,27,28,0,0,52,
 52,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,52,
 52,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 52,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,52,

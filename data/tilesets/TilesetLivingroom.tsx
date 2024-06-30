@@ -1,8 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tileset version="1.10" tiledversion="1.10.2" name="TilesetLivingroom" tilewidth="16" tileheight="16" tilecount="70" columns="10">
  <image source="TilesetLivingroom.png" width="170" height="112"/>
+ <tile id="8">
+  <objectgroup draworder="index" id="2">
+   <object id="3" x="2" y="10" width="14" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="9">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="10" width="14" height="6"/>
+  </objectgroup>
+ </tile>
+ <tile id="18">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="2" y="0" width="14" height="16"/>
+  </objectgroup>
+ </tile>
+ <tile id="19">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="16" height="16"/>
+  </objectgroup>
+ </tile>
  <tile id="24">
-  <objectgroup>
+  <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="16" height="16"/>
   </objectgroup>
  </tile>
@@ -17,13 +37,33 @@
   </objectgroup>
  </tile>
  <tile id="27">
-  <objectgroup>
+  <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="16" height="16"/>
+  </objectgroup>
+ </tile>
+ <tile id="28">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="2" y="0" width="14" height="10"/>
+  </objectgroup>
+ </tile>
+ <tile id="29">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="16" height="10"/>
   </objectgroup>
  </tile>
  <tile id="30">
   <objectgroup>
    <object id="1" x="0" y="0" width="16" height="16"/>
+  </objectgroup>
+ </tile>
+ <tile id="34">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="16" height="16"/>
+  </objectgroup>
+ </tile>
+ <tile id="35">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="12" width="11" height="4"/>
   </objectgroup>
  </tile>
  <tile id="40">

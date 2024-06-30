@@ -12,7 +12,7 @@ class YSortCameraGroup(pygame.sprite.Group):
         
     def draw(self, surf: pygame.Surface):
         top_layer: "list[Tile]" = []
-        for sprite in sorted(self.sprites(), key=lambda sprite: sprite.rect.centery):
+        for sprite in sorted(self.sprites(), key=lambda sprite: round(sprite.rect.centery)):
             if hasattr(sprite, "flip"):
                 surf.blit(pygame.transform.flip(sprite.image, sprite.flip, False), sprite.rect.topleft - self.offset)
             else:
